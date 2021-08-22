@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.4;
 
-import "@openzeppelin/contracts/governance/IGovernor.sol";
+import '@openzeppelin/contracts/governance/IGovernor.sol';
 
 /**
  * @dev Interface of Counter in Elyfi governance
