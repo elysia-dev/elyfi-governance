@@ -104,7 +104,7 @@ export class Elyfi {
       testReserveData.moneyPoolFactor
     );
 
-    return new ElyfiEnv(
+    return new Elyfi(
       admin,
       underlyingAsset,
       incentiveAsset,
