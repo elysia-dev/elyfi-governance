@@ -2,19 +2,22 @@
 pragma solidity 0.8.4;
 
 import '@openzeppelin/contracts/governance/TimelockController.sol';
+
 import '../interfaces/IElyfiGovernanceCore.sol';
 
-contract Executor is TimelockController {
+import '../auxiliaries/Policy.sol';
+
+contract Executor is TimelockController, Policy {
+  /// @param minDelay Minimum delay for propose execution
+  /// @param proposers Governance core address
+  /// @param executors Executors address
+  /// @param token_ The address of the oken representing voting rights
   constructor(
     uint256 minDelay,
     address[] memory proposers,
     address[] memory executors,
-    IElyfiGovernanceCore governanceCore
-  ) TimelockController(minDelay, proposers, executors) {
-    _governanceCore = governanceCore;
-  }
-
-  IElyfiGovernanceCore private _governanceCore;
+    address token_
+  ) TimelockController(minDelay, proposers, executors) Policy(token_) {}
 
   function execute(
     address target,

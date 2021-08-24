@@ -7,11 +7,11 @@ import '../interfaces/IPolicy.sol';
 import '../libraries/DataStruct.sol';
 
 contract ElyfiGovernanceCore is Governor, GovernorTimelockControl {
-  constructor(address policy, TimelockController _timelock)
+  constructor(TimelockController _timelock)
     Governor('ElyfiGovernanceCore')
     GovernorTimelockControl(_timelock)
   {
-    _policy = IPolicy(policy);
+    _policy = IPolicy(address(_timelock));
   }
 
   IPolicy private _policy;
@@ -85,6 +85,8 @@ contract ElyfiGovernanceCore is Governor, GovernorTimelockControl {
     uint8 support,
     uint256 weight
   ) internal virtual override {
+    require(_policy.validateVoter(account, block.number), 'ElyfiGovernor: ');
+
     DataStruct.ProposalVote storage proposalvote = _proposalVotes[proposalId];
 
     require(!_hasVoted[proposalId][account], 'ElyfiGovernor: vote already casted');
@@ -139,6 +141,7 @@ contract ElyfiGovernanceCore is Governor, GovernorTimelockControl {
     bytes[] memory calldatas,
     string memory description
   ) public override(Governor, IGovernor) returns (uint256) {
+    require(_policy.validateProposer(_msgSender(), block.number));
     return super.propose(targets, values, calldatas, description);
   }
 
