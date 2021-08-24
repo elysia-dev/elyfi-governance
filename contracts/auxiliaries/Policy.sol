@@ -3,7 +3,7 @@ pragma solidity 0.8.4;
 
 import '../interfaces/IElyfiGovernanceCore.sol';
 import '@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol';
-import '@openzeppelin/access/AccessControl.sol';
+import '@openzeppelin/contracts/access/AccessControl.sol';
 import '../interfaces/IPolicy.sol';
 
 contract Policy is IPolicy {

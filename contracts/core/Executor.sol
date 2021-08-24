@@ -11,7 +11,7 @@ contract Executor is TimelockController, Policy {
   /// @param minDelay Minimum delay for propose execution
   /// @param proposers Governance core address
   /// @param executors Executors address
-  /// @param token_ The address of the oken representing voting rights
+  /// @param token_ The address of the token representing voting rights
   constructor(
     uint256 minDelay,
     address[] memory proposers,
