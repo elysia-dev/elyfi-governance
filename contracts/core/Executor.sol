@@ -2,9 +2,7 @@
 pragma solidity 0.8.4;
 
 import '@openzeppelin/contracts/governance/TimelockController.sol';
-
 import '../interfaces/IElyfiGovernanceCore.sol';
-
 import '../auxiliaries/Policy.sol';
 
 contract Executor is TimelockController, Policy {

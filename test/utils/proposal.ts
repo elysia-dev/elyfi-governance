@@ -20,6 +20,8 @@ export class Proposal {
     this.state = ProposalState.active;
   }
 
+  // public async expectProposalState(id: BigNumber, )
+
   public async setProposalId(id: BigNumber) {
     this.id = id;
   }

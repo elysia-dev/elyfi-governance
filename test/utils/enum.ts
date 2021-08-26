@@ -1,16 +1,16 @@
 export enum ProposalState {
-  pending = 'Pending',
-  active = 'Active',
-  canceled = 'Canceled',
-  defeated = 'Defeated',
-  succeeded = 'Succeeded',
-  queued = 'Queued',
-  expired = 'Expired',
-  executed = 'Executed',
+  pending,
+  active,
+  canceled,
+  defeated,
+  succeeded,
+  queued,
+  expired,
+  executed,
 }
 
 export enum VoteType {
-  against = 'Against',
-  for = 'For',
-  abstain = 'Abstain',
+  against,
+  for,
+  abstain,
 }

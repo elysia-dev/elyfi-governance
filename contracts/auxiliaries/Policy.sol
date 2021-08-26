@@ -6,12 +6,21 @@ import '@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol';
 import '@openzeppelin/contracts/access/AccessControl.sol';
 import '../interfaces/IPolicy.sol';
 
-contract Policy is IPolicy {
+contract Policy is IPolicy, AccessControl {
+  bytes32 public constant LENDING_COMPANY_ROLE = keccak256('LENDING_COMPANY_ROLE');
+  bytes32 public constant POLICY_ADMIN_ROLE = keccak256('POLICY_ADMIN_ROLE');
+
   uint256 private _quorumNumerator;
   ERC20Votes public immutable token;
   uint256 private _minVotingPower;
 
   constructor(address token_) {
+    _setRoleAdmin(POLICY_ADMIN_ROLE, POLICY_ADMIN_ROLE);
+    _setRoleAdmin(LENDING_COMPANY_ROLE, POLICY_ADMIN_ROLE);
+
+    _setupRole(POLICY_ADMIN_ROLE, address(this));
+    _setupRole(POLICY_ADMIN_ROLE, _msgSender());
+
     token = ERC20Votes(token_);
   }
 
@@ -26,7 +35,10 @@ contract Policy is IPolicy {
     view
     override
     returns (bool)
-  {}
+  {
+    blockNumber;
+    return _validateProposer(account);
+  }
 
   /// @notice Check whether voter can vote on the proposal at the end of the blockNumber
   /// @dev Voter ... TODO : set requirements for the voter
@@ -112,6 +124,12 @@ contract Policy is IPolicy {
   }
 
   //////////////////////// Propose
+
+  /// @notice In the current elyfi, the lending company who has a collateral service provider role is allowed to create proposal.
+  /// @param account The address of proposer
+  function _validateProposer(address account) internal view returns (bool) {
+    return hasRole(LENDING_COMPANY_ROLE, account);
+  }
 
   /////////////////////// Voting power
 

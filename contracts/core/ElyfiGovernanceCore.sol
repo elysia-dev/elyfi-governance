@@ -141,7 +141,7 @@ contract ElyfiGovernanceCore is Governor, GovernorTimelockControl {
     bytes[] memory calldatas,
     string memory description
   ) public override(Governor, IGovernor) returns (uint256) {
-    require(_policy.validateProposer(_msgSender(), block.number));
+    require(_policy.validateProposer(_msgSender(), block.number), 'Invaild Proposer');
     return super.propose(targets, values, calldatas, description);
   }
 

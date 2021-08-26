@@ -1,7 +1,7 @@
 import { ElyfiGovernanceCore, Executor } from '../../typechain';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
-import { Connector, Tokenizer, StakingPool } from '@elysia-dev/contract-typechain';
+import { Connector, Tokenizer, StakingPool, ERC20Test } from '@elysia-dev/contract-typechain';
 
 import { Elyfi } from './elyfi';
 import { waffle } from 'hardhat';
@@ -11,7 +11,9 @@ import ElyfiGovernanceCoreArtifact from '../../artifacts/contracts/core/ElyfiGov
 import ExecutorArtifact from '../../artifacts/contracts/core/Executor.sol/Executor.json';
 
 import StakingPoolV2Artifact from '@elysia-dev/contract-artifacts/artifacts/contracts/StakingPoolV2.sol/StakingPoolV2.json';
-import { Contract } from 'ethers';
+import ERC20Artifact from '@elysia-dev/contract-artifacts/artifacts/contracts/test/ERC20Test.sol/ERC20Test.json';
+
+import { Contract, utils } from 'ethers';
 
 export class TestEnv {
   admin: SignerWithAddress;
@@ -43,11 +45,24 @@ export class TestEnv {
     setupElyfi?: Boolean
   ) {
     let elyfi: Elyfi | undefined;
-    const stakedElyfiToken = (await waffle.deployContract(
-      admin,
-      StakingPoolV2Artifact,
-      []
-    )) as Contract;
+
+    const elyfiToken = (await waffle.deployContract(admin, ERC20Artifact, [
+      utils.parseUnits('1', 36),
+      'name',
+      'symbol',
+    ])) as ERC20Test;
+
+    const rewardAsset = (await waffle.deployContract(admin, ERC20Artifact, [
+      utils.parseUnits('1', 36),
+      'name',
+      'symbol',
+    ])) as ERC20Test;
+
+    const stakedElyfiToken = (await waffle.deployContract(admin, StakingPoolV2Artifact, [
+      elyfiToken.address,
+      rewardAsset.address,
+    ])) as Contract;
+
     const executor = (await waffle.deployContract(admin, ExecutorArtifact, [
       6400,
       [],
@@ -59,7 +74,11 @@ export class TestEnv {
     ])) as ElyfiGovernanceCore;
 
     await executor.grantRole(await executor.PROPOSER_ROLE(), core.address);
-    await executor.grantRole(await executor.EXECUTOR_ROLE(), proposer.address);
+    await executor.grantRole(await executor.LENDING_COMPANY_ROLE(), proposer.address);
+    console.log(
+      '123123',
+      await executor.hasRole(await executor.LENDING_COMPANY_ROLE(), proposer.address)
+    );
 
     elyfi = undefined;
 

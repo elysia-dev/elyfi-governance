@@ -1,11 +1,13 @@
 import { Tokenizer } from '@elysia-dev/contract-typechain';
-import { loadFixture } from '@ethereum-waffle/provider';
 import { BigNumber } from '@ethersproject/bignumber';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { expect } from 'chai';
 import { waffle, ethers } from 'hardhat';
 import { TestEnv } from './fixture/testEnv';
 import { VoteType } from './utils/enum';
 import { Proposal } from './utils/proposal';
+
+const { loadFixture } = waffle;
 
 describe('propose', () => {
   let admin: SignerWithAddress;
@@ -19,15 +21,10 @@ describe('propose', () => {
   }
 
   before(async () => {
-    [admin, proposer, voter] = await ethers.getSigners();
-    const proposalId = BigNumber.from('1234');
-    const targets = [testEnv.core.address];
-    const values = [BigNumber.from(0)];
-    const calldatas = [
-      testEnv.core.interface.encodeFunctionData('castVote', [proposalId, VoteType.for]),
-    ];
-
-    proposal = await Proposal.createProposal(targets, values, calldatas, 'description');
+    const signers = await ethers.getSigners();
+    admin = signers[0];
+    proposer = signers[1];
+    voter = signers[2];
   });
 
   after(async () => {
@@ -36,16 +33,33 @@ describe('propose', () => {
 
   beforeEach(async () => {
     testEnv = await loadFixture(fixture);
+    const proposalId = BigNumber.from('1234');
+    const targets = [testEnv.core.address];
+    const values = [BigNumber.from(0)];
+    const calldatas = [
+      testEnv.core.interface.encodeFunctionData('castVote', [proposalId, VoteType.for]),
+    ];
+    proposal = await Proposal.createProposal(targets, values, calldatas, 'description');
   });
-});
 
-describe('', async () => {
-  it('success', async () => {});
-  it('reverts if proposer has not been authorized', async () => {});
-});
+  it('reverts if proposer has not been authorized', async () => {
+    await expect(
+      testEnv.core
+        .connect(voter)
+        .propose(proposal.targets, proposal.values, proposal.callDatas, proposal.description)
+    ).to.be.revertedWith('Invaild Proposer');
+  });
 
-describe('Invalid proposal', async () => {
-  it('reverts if target is not designated', async () => {});
-  it('reverts if mismatch in targets and calldata', async () => {});
-  it('reverts if mismatch in targets and data', async () => {});
+  it('success', async () => {
+    expect(
+      await testEnv.core
+        .connect(proposer)
+        .propose(proposal.targets, proposal.values, proposal.callDatas, proposal.description)
+    ).to.emit(testEnv.core, 'ProposalCreated');
+  });
+
+  context('Invalid proposal', async () => {
+    const targets = it('reverts if target is not designated', async () => {});
+    it('reverts if mismatch in the number of targets and calldatas', async () => {});
+  });
 });
