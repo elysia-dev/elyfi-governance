@@ -8,3 +8,9 @@ export enum ProposalState {
   expired = 'Expired',
   executed = 'Executed',
 }
+
+export enum VoteType {
+  against = 'Against',
+  for = 'For',
+  abstain = 'Abstain',
+}

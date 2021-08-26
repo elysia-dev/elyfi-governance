@@ -16,7 +16,10 @@ interface IPolicy {
 
   function voteSucceeded(DataStruct.ProposalVote memory proposal) external view returns (bool);
 
-  function quorumReached(DataStruct.ProposalVote memory proposal) external view returns (bool);
+  function quorumReached(DataStruct.ProposalVote memory proposal, uint256 blockNumber)
+    external
+    view
+    returns (bool);
 
   function quorum(uint256 blockNumber) external view returns (uint256);
 }

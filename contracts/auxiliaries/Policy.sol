@@ -9,6 +9,7 @@ import '../interfaces/IPolicy.sol';
 contract Policy is IPolicy {
   uint256 private _quorumNumerator;
   ERC20Votes public immutable token;
+  uint256 private _minVotingPower;
 
   constructor(address token_) {
     token = ERC20Votes(token_);
@@ -36,17 +37,21 @@ contract Policy is IPolicy {
     view
     override
     returns (bool)
-  {}
+  {
+    return token.getPastVotes(account, blockNumber) >= minVotingPower();
+  }
 
   /// @notice Check whether the proposal has been succeeded under the current governance policy
   /// @dev The propose should be ... TODO : set requirements for the success
-  /// @param proposal The currnet proposal data
-  function voteSucceeded(DataStruct.ProposalVote memory proposal)
+  /// @param proposalVote The currnet proposal data
+  function voteSucceeded(DataStruct.ProposalVote memory proposalVote)
     external
     view
     override
     returns (bool)
-  {}
+  {
+    return proposalVote.forVotes > proposalVote.againstVotes;
+  }
 
   /// @notice Returns the voting power of an account at a specific blockNumber
   /// @dev The voting power is the amount of staked governance token
@@ -58,13 +63,16 @@ contract Policy is IPolicy {
 
   /// @notice Returns whether the casted vote in the proposal exceeds quorum
   /// @dev The quorum can be updated
-  /// @param proposal The proposal to check
-  function quorumReached(DataStruct.ProposalVote memory proposal)
+  /// @param proposalVote The proposal to check
+  /// @param blockNumber The vote start blockNumber
+  function quorumReached(DataStruct.ProposalVote memory proposalVote, uint256 blockNumber)
     external
     view
     override
     returns (bool)
-  {}
+  {
+    return (quorum(blockNumber) <= proposalVote.forVotes + proposalVote.abstainVotes);
+  }
 
   /// @notice Returns whether the casted vote in the proposal exceeds quorum
   /// @dev The quorum can be updated
@@ -101,5 +109,17 @@ contract Policy is IPolicy {
     _quorumNumerator = newQuorumNumerator;
 
     emit QuorumNumeratorUpdated(oldQuorumNumerator, newQuorumNumerator);
+  }
+
+  //////////////////////// Propose
+
+  /////////////////////// Voting power
+
+  function minVotingPower() public view returns (uint256) {
+    return _minVotingPower;
+  }
+
+  function setminVotingPower(uint256 newMinPower) external {
+    _minVotingPower = newMinPower;
   }
 }

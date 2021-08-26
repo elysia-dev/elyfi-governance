@@ -64,7 +64,7 @@ contract ElyfiGovernanceCore is Governor, GovernorTimelockControl {
   function _quorumReached(uint256 proposalId) internal view virtual override returns (bool) {
     DataStruct.ProposalVote storage proposalvote = _proposalVotes[proposalId];
 
-    return _policy.quorumReached(proposalvote);
+    return _policy.quorumReached(proposalvote, proposalSnapshot(proposalId));
   }
 
   /**

@@ -17,13 +17,14 @@ export class Proposal {
     this.callDatas = callDatas;
     this.description = description;
     this.id = BigNumber.from(0);
+    this.state = ProposalState.active;
   }
 
   public async setProposalId(id: BigNumber) {
     this.id = id;
   }
 
-  public async createProposal(
+  public static async createProposal(
     targets: string[],
     values: BigNumber[],
     callDatas: string[],
