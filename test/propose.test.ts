@@ -17,7 +17,7 @@ describe('propose', () => {
   let proposal: Proposal;
 
   async function fixture() {
-    return await TestEnv.setup(admin, proposer, false);
+    return await TestEnv.setup(admin, false);
   }
 
   before(async () => {

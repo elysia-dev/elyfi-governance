@@ -14,36 +14,69 @@ import StakingPoolV2Artifact from '@elysia-dev/contract-artifacts/artifacts/cont
 import ERC20Artifact from '@elysia-dev/contract-artifacts/artifacts/contracts/test/ERC20Test.sol/ERC20Test.json';
 
 import { Contract, utils } from 'ethers';
+import { VoteType } from '../utils/enum';
+
+import { Event } from '@ethersproject/contracts';
+
+import { Result } from '@ethersproject/abi';
 
 export class TestEnv {
   admin: SignerWithAddress;
-  proposer: SignerWithAddress;
   core: ElyfiGovernanceCore;
   executor: Executor;
+  elyfiToken: ERC20Test;
   stakedElyfiToken: Contract;
   elyfi: Elyfi | undefined;
 
   constructor(
     admin: SignerWithAddress,
-    proposer: SignerWithAddress,
     core: ElyfiGovernanceCore,
     executor: Executor,
+    elyfiToken: ERC20Test,
     stakedElyfiToken: Contract,
     elyfi: Elyfi | undefined
   ) {
     this.admin = admin;
-    this.proposer = proposer;
     this.core = core;
     this.executor = executor;
+    this.elyfiToken = elyfiToken;
     this.stakedElyfiToken = stakedElyfiToken;
     this.elyfi = elyfi;
   }
 
-  public static async setup(
-    admin: SignerWithAddress,
-    proposer: SignerWithAddress,
-    setupElyfi?: Boolean
-  ) {
+  public async setVoters(accounts: SignerWithAddress[]) {
+    for (let account of accounts) {
+      await this.elyfiToken.connect(account).faucet();
+      const balance = await this.elyfiToken.balanceOf(account.address);
+      await this.elyfiToken.connect(account).approve(this.stakedElyfiToken.address, balance);
+      await this.stakedElyfiToken.connect(account).stake(balance);
+    }
+  }
+
+  public async setProposers(accounts: SignerWithAddress[]) {
+    for (let account of accounts) {
+      await this.executor
+        .connect(this.admin)
+        .grantRole(await this.executor.LENDING_COMPANY_ROLE(), account.address);
+    }
+  }
+
+  public async propose(proposer: SignerWithAddress, proposal: Proposal) {
+    const createdProposal = { ...proposal } as Proposal;
+
+    const proposalTx = await this.core
+      .connect(proposer)
+      .propose(proposal.targets, proposal.values, proposal.callDatas, proposal.description);
+
+    const events = (await proposalTx.wait()).events as Array<Event>;
+    const result = events[0].args as Result;
+
+    createdProposal.id = result['proposalId'];
+
+    return createdProposal;
+  }
+
+  public static async setup(admin: SignerWithAddress, setupElyfi?: Boolean) {
     let elyfi: Elyfi | undefined;
 
     const elyfiToken = (await waffle.deployContract(admin, ERC20Artifact, [
@@ -69,22 +102,20 @@ export class TestEnv {
       [],
       stakedElyfiToken.address,
     ])) as Executor;
+
     const core = (await waffle.deployContract(admin, ElyfiGovernanceCoreArtifact, [
       executor.address,
     ])) as ElyfiGovernanceCore;
 
-    await executor.grantRole(await executor.PROPOSER_ROLE(), core.address);
-    await executor.grantRole(await executor.LENDING_COMPANY_ROLE(), proposer.address);
-    console.log(
-      '123123',
-      await executor.hasRole(await executor.LENDING_COMPANY_ROLE(), proposer.address)
-    );
+    await executor.init(core.address);
+
+    console.log(executor.address);
 
     elyfi = undefined;
 
     if (setupElyfi) {
       elyfi = await Elyfi.setup(admin);
     }
-    return new TestEnv(admin, proposer, core, executor, stakedElyfiToken, elyfi);
+    return new TestEnv(admin, core, executor, elyfiToken, stakedElyfiToken, elyfi);
   }
 }

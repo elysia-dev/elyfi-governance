@@ -10,7 +10,7 @@ describe('core', () => {
   let testEnv: TestEnv;
 
   async function fixture() {
-    return await TestEnv.setup(admin, proposer, false);
+    return await TestEnv.setup(admin, false);
   }
 
   before(async () => {

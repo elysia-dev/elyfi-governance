@@ -6,6 +6,8 @@ import '../interfaces/IElyfiGovernanceCore.sol';
 import '../auxiliaries/Policy.sol';
 
 contract Executor is TimelockController, Policy {
+  event ExecutorInitialized();
+
   /// @param minDelay Minimum delay for propose execution
   /// @param proposers Governance core address
   /// @param executors Executors address
@@ -16,6 +18,12 @@ contract Executor is TimelockController, Policy {
     address[] memory executors,
     address token_
   ) TimelockController(minDelay, proposers, executors) Policy(token_) {}
+
+  function init(address governanceCore) public {
+    grantRole(POLICY_ADMIN_ROLE, governanceCore);
+    grantRole(PROPOSER_ROLE, governanceCore);
+    emit ExecutorInitialized();
+  }
 
   function execute(
     address target,
