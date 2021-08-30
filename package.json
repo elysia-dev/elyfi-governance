@@ -18,6 +18,7 @@
     "@types/node": "^15.0.1",
     "chai": "^4.3.4",
     "dotenv": "^10.0.0",
+    "eth-sig-util": "^3.0.1",
     "ethereum-waffle": "^3.3.0",
     "ethers": "^5.3.0",
     "hardhat": "^2.6.0",

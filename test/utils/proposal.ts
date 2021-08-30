@@ -10,6 +10,8 @@ export class Proposal {
   description: string;
   id: BigNumber;
   state: ProposalState;
+  startBlock: BigNumber;
+  endBlock: BigNumber;
 
   constructor(targets: string[], values: BigNumber[], callDatas: string[], description: string) {
     this.targets = targets;
@@ -18,12 +20,8 @@ export class Proposal {
     this.description = description;
     this.id = BigNumber.from(0);
     this.state = ProposalState.active;
-  }
-
-  // public async expectProposalState(id: BigNumber, )
-
-  public async setProposalId(id: BigNumber) {
-    this.id = id;
+    this.startBlock = BigNumber.from(0);
+    this.endBlock = BigNumber.from(0);
   }
 
   public static async createProposal(

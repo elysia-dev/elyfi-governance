@@ -1,5 +1,4 @@
 import { ElyfiGovernanceCore, Executor } from '../../typechain';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
 import { Connector, Tokenizer, StakingPool, ERC20Test } from '@elysia-dev/contract-typechain';
 
@@ -13,7 +12,7 @@ import ExecutorArtifact from '../../artifacts/contracts/core/Executor.sol/Execut
 import StakingPoolV2Artifact from '@elysia-dev/contract-artifacts/artifacts/contracts/StakingPoolV2.sol/StakingPoolV2.json';
 import ERC20Artifact from '@elysia-dev/contract-artifacts/artifacts/contracts/test/ERC20Test.sol/ERC20Test.json';
 
-import { Contract, utils } from 'ethers';
+import { Contract, utils, Wallet } from 'ethers';
 import { VoteType } from '../utils/enum';
 
 import { Event } from '@ethersproject/contracts';
@@ -21,7 +20,7 @@ import { Event } from '@ethersproject/contracts';
 import { Result } from '@ethersproject/abi';
 
 export class TestEnv {
-  admin: SignerWithAddress;
+  admin: Wallet;
   core: ElyfiGovernanceCore;
   executor: Executor;
   elyfiToken: ERC20Test;
@@ -29,7 +28,7 @@ export class TestEnv {
   elyfi: Elyfi | undefined;
 
   constructor(
-    admin: SignerWithAddress,
+    admin: Wallet,
     core: ElyfiGovernanceCore,
     executor: Executor,
     elyfiToken: ERC20Test,
@@ -44,7 +43,7 @@ export class TestEnv {
     this.elyfi = elyfi;
   }
 
-  public async setVoters(accounts: SignerWithAddress[]) {
+  public async setVoters(accounts: Wallet[]) {
     for (let account of accounts) {
       await this.elyfiToken.connect(account).faucet();
       const balance = await this.elyfiToken.balanceOf(account.address);
@@ -53,7 +52,7 @@ export class TestEnv {
     }
   }
 
-  public async setProposers(accounts: SignerWithAddress[]) {
+  public async setProposers(accounts: Wallet[]) {
     for (let account of accounts) {
       await this.executor
         .connect(this.admin)
@@ -61,7 +60,7 @@ export class TestEnv {
     }
   }
 
-  public async propose(proposer: SignerWithAddress, proposal: Proposal) {
+  public async propose(proposer: Wallet, proposal: Proposal) {
     const createdProposal = { ...proposal } as Proposal;
 
     const proposalTx = await this.core
@@ -72,11 +71,13 @@ export class TestEnv {
     const result = events[0].args as Result;
 
     createdProposal.id = result['proposalId'];
+    createdProposal.startBlock = result['snapshot'];
+    createdProposal.endBlock = result['deadline'];
 
     return createdProposal;
   }
 
-  public static async setup(admin: SignerWithAddress, setupElyfi?: Boolean) {
+  public static async setup(admin: Wallet, setupElyfi?: Boolean) {
     let elyfi: Elyfi | undefined;
 
     const elyfiToken = (await waffle.deployContract(admin, ERC20Artifact, [

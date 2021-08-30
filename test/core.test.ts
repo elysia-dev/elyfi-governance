@@ -1,12 +1,12 @@
 import { loadFixture } from '@ethereum-waffle/provider';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { Wallet } from 'ethers';
 import { waffle, ethers } from 'hardhat';
 import { TestEnv } from './fixture/testEnv';
 
 describe('core', () => {
-  let admin: SignerWithAddress;
-  let proposer: SignerWithAddress;
-  let voter: SignerWithAddress;
+  let admin: Wallet;
+  let proposer: Wallet;
+  let voter: Wallet;
   let testEnv: TestEnv;
 
   async function fixture() {
@@ -14,7 +14,7 @@ describe('core', () => {
   }
 
   before(async () => {
-    [admin, proposer, voter] = await ethers.getSigners();
+    [admin, proposer, voter] = waffle.provider.getWallets();
   });
 
   after(async () => {

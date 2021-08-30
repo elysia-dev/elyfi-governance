@@ -32,14 +32,13 @@ import IndexArtifact from '@elysia-dev/contract-artifacts/artifacts/contracts/lo
 
 import TimeConverterArtifact from '@elysia-dev/contract-artifacts/artifacts/contracts/libraries/TimeConverter.sol/TimeConverter.json';
 
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { Contract, BigNumber, utils } from 'ethers';
+import { Contract, BigNumber, utils, Wallet } from 'ethers';
 import { ethers, waffle } from 'hardhat';
 import { toRate } from '../utils/math';
 // import { testIncentiveAmountPerSecond, testInterestModelParams, testReserveData } from './testData';
 
 export class Elyfi {
-  admin: SignerWithAddress;
+  admin: Wallet;
   underlyingAsset: ERC20Test;
   incentiveAsset: ERC20Test;
   connector: Connector;
@@ -52,7 +51,7 @@ export class Elyfi {
   dataPipeline: DataPipeline;
 
   constructor(
-    admin: SignerWithAddress,
+    admin: Wallet,
     underlyingAsset: ERC20Test,
     incentiveAsset: ERC20Test,
     connector: Connector,
@@ -77,7 +76,7 @@ export class Elyfi {
     this.dataPipeline = dataPipeline;
   }
 
-  public static async setup(admin: SignerWithAddress) {
+  public static async setup(admin: Wallet) {
     let validation: Validation;
     const validationFactory = (await ethers.getContractFactory(
       'Validation'

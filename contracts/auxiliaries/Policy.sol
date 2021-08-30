@@ -6,6 +6,8 @@ import '@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol';
 import '@openzeppelin/contracts/access/AccessControl.sol';
 import '../interfaces/IPolicy.sol';
 
+import 'hardhat/console.sol';
+
 contract Policy is IPolicy, AccessControl {
   bytes32 public constant LENDING_COMPANY_ROLE = keccak256('LENDING_COMPANY_ROLE');
   bytes32 public constant POLICY_ADMIN_ROLE = keccak256('POLICY_ADMIN_ROLE');
@@ -70,6 +72,7 @@ contract Policy is IPolicy, AccessControl {
   /// @param account The address
   /// @param blockNumber The past blocknumber
   function getVotes(address account, uint256 blockNumber) external view override returns (uint256) {
+    console.log('blockNumber', blockNumber, block.number, blockNumber < block.number);
     return token.getPastVotes(account, blockNumber);
   }
 

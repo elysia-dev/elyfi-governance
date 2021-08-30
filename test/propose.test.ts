@@ -1,7 +1,6 @@
-import { Tokenizer } from '@elysia-dev/contract-typechain';
 import { BigNumber } from '@ethersproject/bignumber';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
+import { Wallet } from 'ethers';
 import { waffle, ethers } from 'hardhat';
 import { TestEnv } from './fixture/testEnv';
 import { VoteType } from './utils/enum';
@@ -10,9 +9,9 @@ import { Proposal } from './utils/proposal';
 const { loadFixture } = waffle;
 
 describe('propose', () => {
-  let admin: SignerWithAddress;
-  let proposer: SignerWithAddress;
-  let voter: SignerWithAddress;
+  let admin: Wallet;
+  let proposer: Wallet;
+  let voter: Wallet;
   let testEnv: TestEnv;
   let proposal: Proposal;
 
@@ -21,10 +20,7 @@ describe('propose', () => {
   }
 
   before(async () => {
-    const signers = await ethers.getSigners();
-    admin = signers[0];
-    proposer = signers[1];
-    voter = signers[2];
+    [admin, proposer, voter] = waffle.provider.getWallets();
   });
 
   after(async () => {
