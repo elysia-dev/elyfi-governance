@@ -18,6 +18,7 @@ import { VoteType } from '../utils/enum';
 import { Event } from '@ethersproject/contracts';
 
 import { Result } from '@ethersproject/abi';
+import { advanceBlock } from '../utils/time';
 
 export class TestEnv {
   admin: Wallet;
@@ -26,6 +27,7 @@ export class TestEnv {
   elyfiToken: ERC20Test;
   stakedElyfiToken: Contract;
   elyfi: Elyfi | undefined;
+  nonce: number;
 
   constructor(
     admin: Wallet,
@@ -41,6 +43,7 @@ export class TestEnv {
     this.elyfiToken = elyfiToken;
     this.stakedElyfiToken = stakedElyfiToken;
     this.elyfi = elyfi;
+    this.nonce = 0;
   }
 
   public async setVoters(accounts: Wallet[]) {
@@ -49,6 +52,7 @@ export class TestEnv {
       const balance = await this.elyfiToken.balanceOf(account.address);
       await this.elyfiToken.connect(account).approve(this.stakedElyfiToken.address, balance);
       await this.stakedElyfiToken.connect(account).stake(balance);
+      console.log(balance.toString(), await this.stakedElyfiToken.getVotes(account.address));
     }
   }
 
@@ -71,8 +75,13 @@ export class TestEnv {
     const result = events[0].args as Result;
 
     createdProposal.id = result['proposalId'];
-    createdProposal.startBlock = result['snapshot'];
-    createdProposal.endBlock = result['deadline'];
+    createdProposal.startBlock = result['startBlock'];
+    createdProposal.endBlock = result['endBlock'];
+
+    await advanceBlock();
+    await advanceBlock();
+
+    this.nonce++;
 
     return createdProposal;
   }

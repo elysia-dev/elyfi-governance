@@ -85,11 +85,14 @@ contract ElyfiGovernanceCore is Governor, GovernorTimelockControl {
     uint8 support,
     uint256 weight
   ) internal virtual override {
-    require(_policy.validateVoter(account, proposalSnapshot(proposalId)), 'ElyfiGovernor: ');
+    require(
+      _policy.validateVoter(account, proposalSnapshot(proposalId)),
+      'ElyfiGovernor: Invalid Voter'
+    );
 
     DataStruct.ProposalVote storage proposalvote = _proposalVotes[proposalId];
 
-    require(!_hasVoted[proposalId][account], 'ElyfiGovernor: vote already casted');
+    require(!_hasVoted[proposalId][account], 'ElyfiGovernor: Vote already casted');
     _hasVoted[proposalId][account] = true;
 
     if (support == uint8(DataStruct.VoteType.Against)) {
