@@ -5,16 +5,13 @@ import { waffle, ethers } from 'hardhat';
 import { TestEnv } from './fixture/testEnv';
 import { VoteType } from './utils/enum';
 import { Proposal } from './utils/proposal';
-import { advanceBlock } from './utils/time';
-import { signTypedData_v4 } from 'eth-sig-util';
 
-import { fromRpcSig, ECDSASignature } from 'ethereumjs-util';
-import { buildDelegationData, getSignatureFromTypedData } from './utils/delegation';
+import { buildDelegationData, getSignatureFromTypedData } from './utils/signature';
 import { MAX_UINT_AMOUNT } from './utils/math';
 
 const { loadFixture } = waffle;
 
-describe('core', () => {
+describe('vote', () => {
   let admin: Wallet;
   let proposer: Wallet;
   let alice: Wallet;
@@ -26,7 +23,7 @@ describe('core', () => {
   async function fixture() {
     const testEnv = await TestEnv.setup(admin, false);
     await testEnv.setProposers([proposer]);
-    await testEnv.setVoters([alice, bob, carol]);
+    await testEnv.setStakers([alice, bob, carol]);
     return testEnv;
   }
 
@@ -51,7 +48,7 @@ describe('core', () => {
     await loadFixture(fixture);
   });
 
-  context('', async () => {
+  context('revert', async () => {
     it('reverts if cast vote on non existing proposal', async () => {
       await expect(testEnv.core.castVote(BigNumber.from(1234), VoteType.for)).to.be.revertedWith(
         'Governor: unknown proposal id'
@@ -65,6 +62,31 @@ describe('core', () => {
       proposal = await testEnv.propose(proposer, proposal);
     });
 
+    it('reverts if voting power is below the minumum', async () => {
+      await testEnv.core.connect(alice).castVote(proposal.id, VoteType.for);
+      await expect(
+        testEnv.core.connect(alice).castVote(proposal.id, VoteType.for)
+      ).to.be.revertedWith('ElyfiGovernor: Vote already casted');
+    });
+
+    context('self delegation', async () => {
+      beforeEach('', async () => {
+        await testEnv.stakedElyfiToken.connect(alice).delegate(alice.address);
+        await testEnv.stakedElyfiToken.connect(bob).delegate(bob.address);
+      });
+
+      it('success', async () => {});
+    });
+
+    context('delegation via signature', async () => {
+      beforeEach('propose', async () => {
+        testEnv = await loadFixture(fixture);
+        proposal = await testEnv.propose(proposer, proposal);
+      });
+
+      it('success', async () => {});
+    });
+
     it('votes and success', async () => {
       const votingWeight = await testEnv.stakedElyfiToken.getPastVotes(
         alice.address,
@@ -76,13 +98,6 @@ describe('core', () => {
     });
 
     it('reverts if vote twice', async () => {
-      await testEnv.core.connect(alice).castVote(proposal.id, VoteType.for);
-      await expect(
-        testEnv.core.connect(alice).castVote(proposal.id, VoteType.for)
-      ).to.be.revertedWith('ElyfiGovernor: Vote already casted');
-    });
-
-    it('reverts if voting power is below the minumum', async () => {
       await testEnv.core.connect(alice).castVote(proposal.id, VoteType.for);
       await expect(
         testEnv.core.connect(alice).castVote(proposal.id, VoteType.for)
@@ -103,7 +118,6 @@ describe('core', () => {
 
       const alicePower = await testEnv.stakedElyfiToken.getVotes(alice.address);
       const bobPower = await testEnv.stakedElyfiToken.getVotes(bob.address);
-      console.log('power before dele', alicePower.toString(), bobPower.toString());
 
       const chainId = (await waffle.provider.getNetwork()).chainId;
       const nonce = '0';
@@ -128,23 +142,11 @@ describe('core', () => {
           signature.s
         );
 
-      const deleAddress = await testEnv.core.test(
-        alice.address,
-        nonce,
-        MAX_UINT_AMOUNT,
-        signature.v,
-        signature.r,
-        signature.s
-      );
-
-      console.log('alice', alice.address, 'sig', deleAddress);
-
       // await testEnv.stakedElyfiToken.connect(bob).delegate(alice.address);
     });
 
-    it('votes via delegation and success', async () => {
+    it.only('votes via delegation and success', async () => {
       proposal = await testEnv.propose(proposer, proposal);
-      console.log(proposal.startBlock.toString());
       const alicePower = await testEnv.stakedElyfiToken.getVotes(alice.address);
       const bobPower = await testEnv.stakedElyfiToken.getVotes(bob.address);
       // const alicePower = await testEnv.stakedElyfiToken.getPastVotes(
@@ -155,7 +157,7 @@ describe('core', () => {
       //   bob.address,
       //   proposal.startBlock
       // );
-      console.log('power after dele', alicePower.toString(), bobPower.toString());
+      // console.log('power after dele', alicePower.toString(), bobPower.toString());
     });
   });
 });

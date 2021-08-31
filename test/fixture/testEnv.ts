@@ -12,13 +12,13 @@ import ExecutorArtifact from '../../artifacts/contracts/core/Executor.sol/Execut
 import StakingPoolV2Artifact from '@elysia-dev/contract-artifacts/artifacts/contracts/StakingPoolV2.sol/StakingPoolV2.json';
 import ERC20Artifact from '@elysia-dev/contract-artifacts/artifacts/contracts/test/ERC20Test.sol/ERC20Test.json';
 
-import { Contract, utils, Wallet } from 'ethers';
+import { BigNumber, Contract, utils, Wallet } from 'ethers';
 import { VoteType } from '../utils/enum';
 
 import { Event } from '@ethersproject/contracts';
 
 import { Result } from '@ethersproject/abi';
-import { advanceBlock } from '../utils/time';
+import { advanceBlock, advanceTimeTo, getTimestamp, toTimestamp } from '../utils/time';
 
 export class TestEnv {
   admin: Wallet;
@@ -53,6 +53,15 @@ export class TestEnv {
       await this.elyfiToken.connect(account).approve(this.stakedElyfiToken.address, balance);
       await this.stakedElyfiToken.connect(account).stake(balance);
       await this.stakedElyfiToken.connect(account).delegate(account.address);
+    }
+  }
+
+  public async setStakers(accounts: Wallet[]) {
+    for (let account of accounts) {
+      await this.elyfiToken.connect(account).faucet();
+      const balance = await this.elyfiToken.balanceOf(account.address);
+      await this.elyfiToken.connect(account).approve(this.stakedElyfiToken.address, balance);
+      await this.stakedElyfiToken.connect(account).stake(balance);
     }
   }
 
@@ -104,7 +113,7 @@ export class TestEnv {
     const stakedElyfiToken = (await waffle.deployContract(admin, StakingPoolV2Artifact, [
       elyfiToken.address,
       rewardAsset.address,
-    ])) as ERC20Votes;
+    ])) as Contract;
 
     const executor = (await waffle.deployContract(admin, ExecutorArtifact, [
       6400,
@@ -119,10 +128,21 @@ export class TestEnv {
 
     await executor.init(core.address);
 
-    console.log(executor.address);
+    const rewardPersecond = BigNumber.from(utils.parseEther('1'));
+    const year = BigNumber.from(2022);
+    const month = BigNumber.from(7);
+    const day = BigNumber.from(7);
+    const duration = BigNumber.from(30);
+
+    const startTimestamp = toTimestamp(year, month, day, BigNumber.from(10));
+
+    const initTx = await stakedElyfiToken
+      .connect(admin)
+      .initNewRound(rewardPersecond, year, month, day, duration);
+
+    await advanceTimeTo(await getTimestamp(initTx), startTimestamp);
 
     elyfi = undefined;
-
     if (setupElyfi) {
       elyfi = await Elyfi.setup(admin);
     }
