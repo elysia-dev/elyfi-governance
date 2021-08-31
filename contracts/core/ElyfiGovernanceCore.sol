@@ -179,4 +179,24 @@ contract ElyfiGovernanceCore is Governor, GovernorTimelockControl {
   {
     return super.supportsInterface(interfaceId);
   }
+
+  function test(
+    address delegatee,
+    uint256 nonce,
+    uint256 expiry,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) public view returns (address) {
+    bytes32 _DELEGATION_TYPEHASH = keccak256(
+      'Delegation(address delegatee,uint256 nonce,uint256 expiry)'
+    );
+    address signer = ECDSA.recover(
+      _hashTypedDataV4(keccak256(abi.encode(_DELEGATION_TYPEHASH, delegatee, nonce, expiry))),
+      v,
+      r,
+      s
+    );
+    return signer;
+  }
 }

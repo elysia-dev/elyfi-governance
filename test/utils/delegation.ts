@@ -3,6 +3,7 @@ import { Wallet } from '@ethersproject/wallet';
 import ethSigUtil, {
   MsgParams,
   signTypedData_v4,
+  signTypedMessage,
   TypedData,
   TypedDataUtils,
   TypedMessage,
@@ -47,7 +48,7 @@ const version = '1';
 
 export const buildDelegationData = (
   chainId: number,
-  contract: string,
+  verifyingContract: string,
   delegatee: string,
   nonce: string,
   expiry: string
@@ -56,6 +57,7 @@ export const buildDelegationData = (
     types: {
       EIP712Domain: [
         { name: 'name', type: 'string' },
+        { name: 'version', type: 'string' },
         { name: 'chainId', type: 'uint256' },
         { name: 'verifyingContract', type: 'address' },
       ],
@@ -70,12 +72,12 @@ export const buildDelegationData = (
       name: 'StakedElyfiToken',
       version: '1',
       chainId: chainId,
-      verifyingContract: contract,
+      verifyingContract: verifyingContract,
     },
     message: {
-      delegatee,
-      nonce,
-      expiry,
+      delegatee: delegatee,
+      nonce: nonce,
+      expiry: expiry,
     },
   };
   return typedData;
@@ -85,7 +87,7 @@ export const getSignatureFromTypedData = (
   privateKey: string,
   typedData: TypedMessage<any>
 ): ECDSASignature => {
-  const signature = signTypedData_v4(Buffer.from(privateKey.substring(2, 66), 'hex'), {
+  const signature = signTypedMessage(Buffer.from(privateKey.substring(2, 66), 'hex'), {
     data: typedData,
   });
   return fromRpcSig(signature);

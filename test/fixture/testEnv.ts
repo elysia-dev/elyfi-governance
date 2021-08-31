@@ -1,4 +1,4 @@
-import { ElyfiGovernanceCore, Executor } from '../../typechain';
+import { ElyfiGovernanceCore, ERC20Votes, Executor } from '../../typechain';
 
 import { Connector, Tokenizer, StakingPool, ERC20Test } from '@elysia-dev/contract-typechain';
 
@@ -52,7 +52,7 @@ export class TestEnv {
       const balance = await this.elyfiToken.balanceOf(account.address);
       await this.elyfiToken.connect(account).approve(this.stakedElyfiToken.address, balance);
       await this.stakedElyfiToken.connect(account).stake(balance);
-      console.log(balance.toString(), await this.stakedElyfiToken.getVotes(account.address));
+      await this.stakedElyfiToken.connect(account).delegate(account.address);
     }
   }
 
@@ -104,7 +104,7 @@ export class TestEnv {
     const stakedElyfiToken = (await waffle.deployContract(admin, StakingPoolV2Artifact, [
       elyfiToken.address,
       rewardAsset.address,
-    ])) as Contract;
+    ])) as ERC20Votes;
 
     const executor = (await waffle.deployContract(admin, ExecutorArtifact, [
       6400,

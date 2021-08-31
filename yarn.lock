@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@elysia-dev/contract-artifacts@^0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@elysia-dev/contract-artifacts/-/contract-artifacts-0.0.4.tgz#aeff7597bbe40a1067f4583953d37e8b38e07138"
-  integrity sha512-nvKOECi/Qeig61hiACSeoOvWXvAO4dWeXk9ydek/ev1kqfhFGjg13Luef2DF47BLszlQ+i8xu5OMhcESmVr6vw==
+"@elysia-dev/contract-artifacts@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@elysia-dev/contract-artifacts/-/contract-artifacts-0.0.5.tgz#f1de3627136f28e63f4e6c455d8452da0592d861"
+  integrity sha512-KhBxqrsSQD/1qX6I2I6eN8gkofUEY6Z0Im/4jg/UOV72u2gkFerjoJxA63SPeIwqeZFokEs25MQIqvD2rdfF/Q==
 
 "@elysia-dev/contract-typechain@^1.1.0":
   version "1.1.0"
@@ -520,10 +520,10 @@
     "@types/sinon-chai" "^3.2.3"
     "@types/web3" "1.0.19"
 
-"@openzeppelin/contracts@4.3.0-rc.0":
-  version "4.3.0-rc.0"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.3.0-rc.0.tgz#604403e8f08d79829675347f8d4ff1dbbec46487"
-  integrity sha512-eh+uGU+eC0KE0RYCXHhe2HSZKc7EzJ0n/kUH56AmPhjIOTyJkVPz82nSEVviyUVPpTeNy8kr2z0JfCOEGU88Lw==
+"@openzeppelin/contracts@^4.3.1":
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.3.1.tgz#c01f791ce6c9d3989ac1a643267501dbe336b9e3"
+  integrity sha512-QjgbPPlmDK2clK1hzjw2ROfY8KA5q+PfhDUUxZFEBCZP9fi6d5FuNoh/Uq0oCTMEKPmue69vhX2jcl0N/tFKGw==
 
 "@resolver-engine/core@^0.3.3":
   version "0.3.3"

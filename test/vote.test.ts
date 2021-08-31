@@ -102,11 +102,8 @@ describe('core', () => {
       testEnv = await loadFixture(fixture);
 
       const alicePower = await testEnv.stakedElyfiToken.getVotes(alice.address);
-      const bobPower = await testEnv.stakedElyfiToken.getPastVotes(
-        bob.address,
-        proposal.startBlock
-      );
-      console.log(alicePower.toString(), bobPower.toString());
+      const bobPower = await testEnv.stakedElyfiToken.getVotes(bob.address);
+      console.log('power before dele', alicePower.toString(), bobPower.toString());
 
       const chainId = (await waffle.provider.getNetwork()).chainId;
       const nonce = '0';
@@ -118,9 +115,20 @@ describe('core', () => {
         MAX_UINT_AMOUNT
       );
 
-      const signature = getSignatureFromTypedData(bob.privateKey, data);
+      const signature = getSignatureFromTypedData(alice.privateKey, data);
 
-      const tx = await testEnv.stakedElyfiToken.delegateBySig(
+      const tx = await testEnv.stakedElyfiToken
+        .connect(bob)
+        .delegateBySig(
+          alice.address,
+          nonce,
+          MAX_UINT_AMOUNT,
+          signature.v,
+          signature.r,
+          signature.s
+        );
+
+      const deleAddress = await testEnv.core.test(
         alice.address,
         nonce,
         MAX_UINT_AMOUNT,
@@ -128,20 +136,26 @@ describe('core', () => {
         signature.r,
         signature.s
       );
+
+      console.log('alice', alice.address, 'sig', deleAddress);
+
+      // await testEnv.stakedElyfiToken.connect(bob).delegate(alice.address);
     });
 
     it('votes via delegation and success', async () => {
       proposal = await testEnv.propose(proposer, proposal);
       console.log(proposal.startBlock.toString());
-      const alicePower = await testEnv.stakedElyfiToken.getPastVotes(
-        alice.address,
-        proposal.startBlock
-      );
-      const bobPower = await testEnv.stakedElyfiToken.getPastVotes(
-        bob.address,
-        proposal.startBlock
-      );
-      console.log(alicePower.toString(), bobPower.toString());
+      const alicePower = await testEnv.stakedElyfiToken.getVotes(alice.address);
+      const bobPower = await testEnv.stakedElyfiToken.getVotes(bob.address);
+      // const alicePower = await testEnv.stakedElyfiToken.getPastVotes(
+      //   alice.address,
+      //   proposal.startBlock
+      // );
+      // const bobPower = await testEnv.stakedElyfiToken.getPastVotes(
+      //   bob.address,
+      //   proposal.startBlock
+      // );
+      console.log('power after dele', alicePower.toString(), bobPower.toString());
     });
   });
 });
