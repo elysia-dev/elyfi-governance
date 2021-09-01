@@ -8,7 +8,6 @@ import { Proposal } from './utils/proposal';
 
 import { buildBallotData, buildDelegationData, getSignatureFromTypedData } from './utils/signature';
 import { MAX_UINT_AMOUNT } from './utils/math';
-import { advanceBlockTo } from './utils/time';
 
 const { loadFixture } = waffle;
 
@@ -108,7 +107,7 @@ describe('vote', () => {
 
     it('cast vote and success', async () => {
       const tx = await testEnv.core.connect(alice).castVote(proposal.id, VoteType.for);
-      await expect(tx)
+      expect(tx)
         .to.emit(testEnv.core, 'VoteCast')
         .withArgs(alice.address, proposal.id, VoteType.for, votingPower, '');
     });
@@ -124,8 +123,7 @@ describe('vote', () => {
         signature.r,
         signature.s
       );
-
-      await expect(tx)
+      expect(tx)
         .to.emit(testEnv.core, 'VoteCast')
         .withArgs(alice.address, proposal.id, VoteType.for, votingPower, '');
     });
@@ -148,4 +146,6 @@ describe('vote', () => {
 
   it('vote fails if not exceeds quorum', async () => {});
   it('vote fails if against exceeds for', async () => {});
+
+  it('reverts if cast vote on the closed proposal', async () => {});
 });

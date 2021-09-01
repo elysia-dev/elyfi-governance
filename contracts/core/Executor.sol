@@ -16,8 +16,9 @@ contract Executor is TimelockController, Policy {
     uint256 minDelay,
     address[] memory proposers,
     address[] memory executors,
-    address token_
-  ) TimelockController(minDelay, proposers, executors) Policy(token_) {}
+    address token_,
+    uint256 minVotingPower
+  ) TimelockController(minDelay, proposers, executors) Policy(token_, minVotingPower) {}
 
   function init(address governanceCore) public {
     grantRole(POLICY_ADMIN_ROLE, governanceCore);

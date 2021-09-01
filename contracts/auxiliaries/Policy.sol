@@ -10,16 +10,21 @@ contract Policy is IPolicy, AccessControl {
   bytes32 public constant LENDING_COMPANY_ROLE = keccak256('LENDING_COMPANY_ROLE');
   bytes32 public constant POLICY_ADMIN_ROLE = keccak256('POLICY_ADMIN_ROLE');
 
-  uint256 private _quorumNumerator;
   ERC20Votes public immutable token;
+
+  uint256 private _quorumNumerator;
   uint256 private _minVotingPower;
 
-  constructor(address token_) {
+  event MinVotingPowerUpdated(uint256 oldMinVotingPower, uint256 newMinVotingPower);
+
+  constructor(address token_, uint256 minVotingPower_) {
     _setRoleAdmin(POLICY_ADMIN_ROLE, POLICY_ADMIN_ROLE);
     _setRoleAdmin(LENDING_COMPANY_ROLE, POLICY_ADMIN_ROLE);
 
     _setupRole(POLICY_ADMIN_ROLE, address(this));
     _setupRole(POLICY_ADMIN_ROLE, _msgSender());
+
+    _setMinVotingPower(minVotingPower_);
 
     token = ERC20Votes(token_);
   }
@@ -137,7 +142,13 @@ contract Policy is IPolicy, AccessControl {
     return _minVotingPower;
   }
 
-  function setminVotingPower(uint256 newMinPower) external {
-    _minVotingPower = newMinPower;
+  function setMinVotingPower(uint256 newMinVotingPower) external {
+    require(hasRole(POLICY_ADMIN_ROLE, msg.sender), 'Policy: Only Policiy Admin');
+    _setMinVotingPower(newMinVotingPower);
+  }
+
+  function _setMinVotingPower(uint256 newMinVotingPower) internal {
+    _minVotingPower = newMinVotingPower;
+    emit MinVotingPowerUpdated(_minVotingPower, newMinVotingPower);
   }
 }

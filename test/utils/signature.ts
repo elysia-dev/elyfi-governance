@@ -1,14 +1,5 @@
-import { Contract } from '@ethersproject/contracts';
-import { Wallet } from '@ethersproject/wallet';
-import ethSigUtil, {
-  MsgParams,
-  recoverTypedMessage,
-  signTypedData_v4,
-  signTypedMessage,
-  TypedData,
-  TypedDataUtils,
-  TypedMessage,
-} from 'eth-sig-util';
+import { BigNumber } from '@ethersproject/bignumber';
+import { signTypedMessage, TypedMessage } from 'eth-sig-util';
 import { ECDSASignature, fromRpcSig } from 'ethereumjs-util';
 
 export const buildDelegationData = (
@@ -51,7 +42,7 @@ export const buildDelegationData = (
 export const buildBallotData = (
   chainId: number,
   verifyingContract: string,
-  proposalId: string,
+  proposalId: BigNumber,
   support: number
 ) => {
   const typedData: TypedMessage<any> = {
@@ -69,13 +60,13 @@ export const buildBallotData = (
       ],
     },
     domain: {
-      name: 'StakedElyfiToken',
+      name: 'ElyfiGovernanceCore',
       version: '1',
       chainId: chainId,
       verifyingContract: verifyingContract,
     },
     message: {
-      proposalId: proposalId,
+      proposalId: proposalId.toString(),
       support: support,
     },
   };

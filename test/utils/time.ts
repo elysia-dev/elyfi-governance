@@ -28,9 +28,7 @@ export async function advanceTimeTo(current: BigNumber, target: BigNumber) {
 }
 
 export async function advanceBlockTo(to: number) {
-  for (let i = await waffle.provider.getBlockNumber(); i < to; i++) {
-    await advanceBlock();
-  }
+  return await waffle.provider.send('evm_mineBlockNumber', [to]);
 }
 
 export async function saveEVMSnapshot(): Promise<string> {
