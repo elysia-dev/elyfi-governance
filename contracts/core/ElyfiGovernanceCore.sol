@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.2;
+pragma solidity 0.8.4;
 
 import '@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol';
 
@@ -109,11 +109,11 @@ contract ElyfiGovernanceCore is Governor, GovernorTimelockControl {
     }
   }
 
-  function votingDelay() public pure override returns (uint256) {
+  function votingDelay() public view virtual override returns (uint256) {
     return 1; // 1 block
   }
 
-  function votingPeriod() public pure override returns (uint256) {
+  function votingPeriod() public view virtual override returns (uint256) {
     return 45818; // 1 week
   }
 

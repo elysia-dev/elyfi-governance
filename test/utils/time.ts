@@ -1,5 +1,6 @@
 import { BigNumber } from 'ethers';
 import { waffle } from 'hardhat';
+import { Proposal } from './proposal';
 
 export function toTimestamp(year: BigNumber, month: BigNumber, day: BigNumber, hour?: BigNumber) {
   if (hour == undefined) {
@@ -29,6 +30,10 @@ export async function advanceTimeTo(current: BigNumber, target: BigNumber) {
 
 export async function advanceBlockTo(to: number) {
   return await waffle.provider.send('evm_mineBlockNumber', [to]);
+}
+
+export async function advanceBlockToProposalEnd(proposal: Proposal) {
+  return await waffle.provider.send('evm_mineBlockNumber', [proposal.endBlock]);
 }
 
 export async function saveEVMSnapshot(): Promise<string> {

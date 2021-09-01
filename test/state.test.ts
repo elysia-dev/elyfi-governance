@@ -3,15 +3,16 @@ import { expect } from 'chai';
 import { Contract, Wallet } from 'ethers';
 import { waffle, ethers } from 'hardhat';
 import { TestEnv } from './fixture/testEnv';
-import { VoteType } from './utils/enum';
+import { ProposalState, VoteType } from './utils/enum';
 import { Proposal } from './utils/proposal';
 
 import { buildBallotData, buildDelegationData, getSignatureFromTypedData } from './utils/signature';
 import { MAX_UINT_AMOUNT } from './utils/math';
+import { advanceBlockTo, advanceBlockToProposalEnd } from './utils/time';
 
 const { loadFixture } = waffle;
 
-describe('vote', () => {
+describe('state', () => {
   let admin: Wallet;
   let proposer: Wallet;
   let alice: Wallet;
@@ -24,7 +25,7 @@ describe('vote', () => {
   async function fixture() {
     const testEnv = await TestEnv.setup(admin, false);
     await testEnv.setProposers([proposer]);
-    await testEnv.setStakers([alice, bob, carol]);
+    await testEnv.setVoters([alice, bob, carol]);
     return testEnv;
   }
 
@@ -48,6 +49,28 @@ describe('vote', () => {
 
   after(async () => {
     await loadFixture(fixture);
+  });
+
+  context('proposal state', async () => {
+    beforeEach('propose', async () => {
+      proposal = await testEnv.propose(proposer, proposal);
+    });
+    it('active', async () => {
+      await testEnv.expectProposalState(proposal, ProposalState.active);
+    });
+    it('succeeded', async () => {
+      await testEnv.core.connect(alice).castVote(proposal.id, VoteType.for);
+      await advanceBlockToProposalEnd(proposal);
+      await testEnv.expectProposalState(proposal, ProposalState.succeeded);
+    });
+    it('vote fails if against exceeds for', async () => {
+      await testEnv.core.connect(alice).castVote(proposal.id, VoteType.for);
+      await testEnv.core.connect(bob).castVote(proposal.id, VoteType.against);
+      await testEnv.core.connect(carol).castVote(proposal.id, VoteType.against);
+      await advanceBlockToProposalEnd(proposal);
+      await testEnv.expectProposalState(proposal, ProposalState.defeated);
+    });
+    it('vote fails if not exceeds quorum', async () => {});
   });
 
   context('revert', async () => {
@@ -107,7 +130,7 @@ describe('vote', () => {
 
     it('cast vote and success', async () => {
       const tx = await testEnv.core.connect(alice).castVote(proposal.id, VoteType.for);
-      expect(tx)
+      await expect(tx)
         .to.emit(testEnv.core, 'VoteCast')
         .withArgs(alice.address, proposal.id, VoteType.for, votingPower, '');
     });
@@ -123,7 +146,8 @@ describe('vote', () => {
         signature.r,
         signature.s
       );
-      expect(tx)
+
+      await expect(tx)
         .to.emit(testEnv.core, 'VoteCast')
         .withArgs(alice.address, proposal.id, VoteType.for, votingPower, '');
     });
@@ -146,6 +170,4 @@ describe('vote', () => {
 
   it('vote fails if not exceeds quorum', async () => {});
   it('vote fails if against exceeds for', async () => {});
-
-  it('reverts if cast vote on the closed proposal', async () => {});
 });

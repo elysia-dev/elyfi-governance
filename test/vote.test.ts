@@ -8,7 +8,6 @@ import { Proposal } from './utils/proposal';
 
 import { buildBallotData, buildDelegationData, getSignatureFromTypedData } from './utils/signature';
 import { MAX_UINT_AMOUNT } from './utils/math';
-import { advanceBlockTo } from './utils/time';
 
 const { loadFixture } = waffle;
 

@@ -1,4 +1,4 @@
-import { ElyfiGovernanceCore, ERC20Votes, Executor } from '../../typechain';
+import { ElyfiGovernanceCoreTest, ERC20Votes, Executor } from '../../typechain';
 
 import { Connector, Tokenizer, StakingPool, ERC20Test } from '@elysia-dev/contract-typechain';
 
@@ -6,23 +6,24 @@ import { Elyfi } from './elyfi';
 import { waffle } from 'hardhat';
 import { Proposal } from '../utils/proposal';
 
-import ElyfiGovernanceCoreArtifact from '../../artifacts/contracts/core/ElyfiGovernanceCore.sol/ElyfiGovernanceCore.json';
+import ElyfiGovernanceCoreTestArtifact from '../../artifacts/contracts/test/ElyfiGovernanceCoreTest.sol/ElyfiGovernanceCoreTest.json';
 import ExecutorArtifact from '../../artifacts/contracts/core/Executor.sol/Executor.json';
 
 import StakingPoolV2Artifact from '@elysia-dev/contract-artifacts/artifacts/contracts/StakingPoolV2.sol/StakingPoolV2.json';
 import ERC20Artifact from '@elysia-dev/contract-artifacts/artifacts/contracts/test/ERC20Test.sol/ERC20Test.json';
 
 import { BigNumber, Contract, utils, Wallet } from 'ethers';
-import { VoteType } from '../utils/enum';
+import { ProposalState, VoteType } from '../utils/enum';
 
 import { Event } from '@ethersproject/contracts';
+import { expect } from 'chai';
 
 import { Result } from '@ethersproject/abi';
 import { advanceBlock, advanceTimeTo, getTimestamp, toTimestamp } from '../utils/time';
 
 export class TestEnv {
   admin: Wallet;
-  core: ElyfiGovernanceCore;
+  core: ElyfiGovernanceCoreTest;
   executor: Executor;
   elyfiToken: ERC20Test;
   stakedElyfiToken: Contract;
@@ -31,7 +32,7 @@ export class TestEnv {
 
   constructor(
     admin: Wallet,
-    core: ElyfiGovernanceCore,
+    core: ElyfiGovernanceCoreTest,
     executor: Executor,
     elyfiToken: ERC20Test,
     stakedElyfiToken: Contract,
@@ -71,6 +72,11 @@ export class TestEnv {
         .connect(this.admin)
         .grantRole(await this.executor.LENDING_COMPANY_ROLE(), account.address);
     }
+  }
+
+  public async expectProposalState(proposal: Proposal, state: ProposalState) {
+    const proposalState = await this.core.state(proposal.id);
+    expect(proposalState).to.be.equal(state);
   }
 
   public async propose(proposer: Wallet, proposal: Proposal) {
@@ -123,9 +129,11 @@ export class TestEnv {
       utils.parseUnits('10000', 18),
     ])) as Executor;
 
-    const core = (await waffle.deployContract(admin, ElyfiGovernanceCoreArtifact, [
+    const core = (await waffle.deployContract(admin, ElyfiGovernanceCoreTestArtifact, [
       executor.address,
-    ])) as ElyfiGovernanceCore;
+      1,
+      4,
+    ])) as ElyfiGovernanceCoreTest;
 
     await executor.init(core.address);
 

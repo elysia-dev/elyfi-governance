@@ -2,9 +2,10 @@
 pragma solidity 0.8.4;
 
 import '../interfaces/IElyfiGovernanceCore.sol';
+import '../interfaces/IPolicy.sol';
+
 import '@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol';
 import '@openzeppelin/contracts/access/AccessControl.sol';
-import '../interfaces/IPolicy.sol';
 
 contract Policy is IPolicy, AccessControl {
   bytes32 public constant LENDING_COMPANY_ROLE = keccak256('LENDING_COMPANY_ROLE');
@@ -16,6 +17,7 @@ contract Policy is IPolicy, AccessControl {
   uint256 private _minVotingPower;
 
   event MinVotingPowerUpdated(uint256 oldMinVotingPower, uint256 newMinVotingPower);
+  event QuorumNumeratorUpdated(uint256 oldQuorumNumerator, uint256 newQuorumNumerator);
 
   constructor(address token_, uint256 minVotingPower_) {
     _setRoleAdmin(POLICY_ADMIN_ROLE, POLICY_ADMIN_ROLE);
@@ -32,7 +34,7 @@ contract Policy is IPolicy, AccessControl {
   ///////// Main Interfaces
 
   /// @notice Check whether proposer can create the proposal at the end of the blockNumber
-  /// @dev Proposer ... TODO : set requirements for the proposer
+  /// @dev Proposer must be authorized in this version
   /// @param account The proposer address
   /// @param blockNumber The past blocknumber
   function validateProposer(address account, uint256 blockNumber)
@@ -99,8 +101,6 @@ contract Policy is IPolicy, AccessControl {
   }
 
   //////////////////////// Quorum
-
-  event QuorumNumeratorUpdated(uint256 oldQuorumNumerator, uint256 newQuorumNumerator);
 
   function quorumNumerator() public view virtual returns (uint256) {
     return _quorumNumerator;
