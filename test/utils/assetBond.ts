@@ -52,8 +52,8 @@ export class ElyfiAssetBond {
       BigNumber.from(
         '115792089237316195422007842550160057480242544124026915590235438085798243682305'
       ),
-      signer,
       borrower,
+      signer,
       ethers.utils.parseEther('500000'),
       ethers.utils.parseEther('2500000000'),
       toRate(0.1),

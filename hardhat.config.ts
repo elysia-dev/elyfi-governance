@@ -61,6 +61,13 @@ const config: HardhatUserConfig = {
     tests: './test',
     cache: './cache',
   },
+  external: {
+    contracts: [
+      {
+        artifacts: 'node_modules/@elysia-dev/contract-artifacts/artifacts',
+      },
+    ],
+  },
 };
 
 export default config;

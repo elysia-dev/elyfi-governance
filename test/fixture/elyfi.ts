@@ -14,30 +14,22 @@ import {
   Index,
   Rate,
   TimeConverter,
+  ERC20Test__factory,
+  Connector__factory,
+  MoneyPool__factory,
+  IncentivePool__factory,
+  InterestRateModel__factory,
+  LToken__factory,
+  DToken__factory,
+  Tokenizer__factory,
+  DataPipeline__factory,
 } from '@elysia-dev/contract-typechain';
-
-import MoneyPoolArtifact from '@elysia-dev/contract-artifacts/artifacts/contracts/MoneyPool.sol/MoneyPool.json';
-import ConnectorArtifact from '@elysia-dev/contract-artifacts/artifacts/contracts/Connector.sol/Connector.json';
-import TokenizerArtifact from '@elysia-dev/contract-artifacts/artifacts/contracts/Tokenizer.sol/Tokenizer.json';
-import LTokenArtifact from '@elysia-dev/contract-artifacts/artifacts/contracts/LToken.sol/LToken.json';
-import DTokenArtifact from '@elysia-dev/contract-artifacts/artifacts/contracts/DToken.sol/DToken.json';
-import DataPipelineArtifact from '@elysia-dev/contract-artifacts/artifacts/contracts/DataPipeline.sol/DataPipeline.json';
-import IncentivePoolArtifact from '@elysia-dev/contract-artifacts/artifacts/contracts/IncentivePool.sol/IncentivePool.json';
-import InterestRateModelArtifact from '@elysia-dev/contract-artifacts/artifacts/contracts/InterestRateModel.sol/InterestRateModel.json';
-import ERC20Artifact from '@elysia-dev/contract-artifacts/artifacts/contracts/test/ERC20Test.sol/ERC20Test.json';
-
-import AssetBondArtifact from '@elysia-dev/contract-artifacts/artifacts/contracts/logic/AssetBond.sol/AssetBond.json';
-import RateArtifact from '@elysia-dev/contract-artifacts/artifacts/contracts/logic/AssetBond.sol/AssetBond.json';
-import IndexArtifact from '@elysia-dev/contract-artifacts/artifacts/contracts/logic/Index.sol/Index.json';
-
-import TimeConverterArtifact from '@elysia-dev/contract-artifacts/artifacts/contracts/libraries/TimeConverter.sol/TimeConverter.json';
 
 import { Contract, BigNumber, utils, Wallet } from 'ethers';
 import { ethers, waffle } from 'hardhat';
 import { toRate } from '../utils/math';
 
 import { ElyfiAssetBond } from '../utils/assetBond';
-// import { testIncentiveAmountPerSecond, testInterestModelParams, testReserveData } from './testData';
 
 export class Elyfi {
   admin: Wallet;
@@ -90,101 +82,133 @@ export class Elyfi {
     }
   }
 
-  public async mintAssetBond(minter: Wallet | Contract, assetBond: ElyfiAssetBond) {
-    await this.tokenizer.mintAssetBond(minter.address, assetBond.tokenId);
+  public async mintAssetBond(minter: Wallet, assetBond: ElyfiAssetBond) {
+    await this.tokenizer.connect(minter).mintAssetBond(minter.address, assetBond.tokenId);
   }
 
-  public async settleAssetBond(owner: Wallet | Contract, assetBond: ElyfiAssetBond) {
-    await this.tokenizer.settleAssetBond(
-      assetBond.borrower,
-      assetBond.signer,
-      assetBond.tokenId,
-      assetBond.principal,
-      assetBond.couponRate,
-      assetBond.delinquencyRate,
-      assetBond.debtCeiling,
-      assetBond.loanDuration,
-      assetBond.loanStartTimeYear,
-      assetBond.loanStartTimeMonth,
-      assetBond.loanStartTimeDay,
-      'hash'
-    );
+  public async settleAssetBond(owner: Wallet, assetBond: ElyfiAssetBond) {
+    await this.tokenizer
+      .connect(owner)
+      .settleAssetBond(
+        assetBond.borrower,
+        assetBond.signer,
+        assetBond.tokenId,
+        assetBond.principal,
+        assetBond.couponRate,
+        assetBond.delinquencyRate,
+        assetBond.debtCeiling,
+        assetBond.loanDuration,
+        assetBond.loanStartTimeYear,
+        assetBond.loanStartTimeMonth,
+        assetBond.loanStartTimeDay,
+        'hash'
+      );
   }
 
   public static async setup(admin: Wallet) {
-    let validation: Validation;
-    const validationFactory = (await ethers.getContractFactory(
-      'Validation'
-    )) as Validation__factory;
-    validation = await validationFactory.deploy();
+    const validationFactory = await ethers.getContractFactory('Validation');
+    const validation = (await validationFactory.deploy()) as Validation;
 
-    const timeConverter = (await waffle.deployContract(
-      admin,
-      TimeConverterArtifact
-    )) as TimeConverter;
+    const timeConverterFactory = await ethers.getContractFactory('Validation');
+    const timeConverter = (await timeConverterFactory.deploy()) as TimeConverter;
 
-    const assetBond = (await waffle.deployContract(admin, AssetBondArtifact)) as AssetBond;
+    const assetBondFactory = await ethers.getContractFactory('AssetBond', {
+      libraries: {
+        TimeConverter: timeConverter.address,
+      },
+    });
+    const assetBond = (await assetBondFactory.deploy()) as AssetBond;
 
-    const rate = (await waffle.deployContract(admin, RateArtifact)) as Rate;
+    const rateFactory = await ethers.getContractFactory('Rate');
+    const rate = (await rateFactory.deploy()) as Rate;
 
-    const index = (await waffle.deployContract(admin, IndexArtifact)) as Index;
+    const indexFactory = await ethers.getContractFactory('Index');
+    const index = (await indexFactory.deploy()) as Index;
 
-    const underlyingAsset = (await waffle.deployContract(admin, ERC20Artifact, [
+    const erc20Factory = (await ethers.getContractFactory('ERC20Test')) as ERC20Test__factory;
+    const underlyingAsset = (await erc20Factory.deploy(
       utils.parseUnits('1', 36),
       'name',
-      'symbol',
-    ])) as ERC20Test;
-
-    const incentiveAsset = (await waffle.deployContract(admin, ERC20Artifact, [
+      'symbol'
+    )) as ERC20Test;
+    const incentiveAsset = (await erc20Factory.deploy(
       utils.parseUnits('1', 36),
       'name',
-      'symbol',
-    ])) as ERC20Test;
+      'symbol'
+    )) as ERC20Test;
 
-    const connector = (await waffle.deployContract(admin, ConnectorArtifact)) as Connector;
+    const connectorFactory = (await ethers.getContractFactory('Connector')) as Connector__factory;
+    const connector = (await connectorFactory.deploy()) as Connector;
 
-    const moneyPool = (await waffle.deployContract(admin, MoneyPoolArtifact, [
+    const moneyPoolFactory = (await ethers.getContractFactory('MoneyPool', {
+      libraries: {
+        AssetBond: assetBond.address,
+        Validation: validation.address,
+        TimeConverter: timeConverter.address,
+        Index: index.address,
+        Rate: rate.address,
+      },
+    })) as MoneyPool__factory;
+    const moneyPool = (await moneyPoolFactory.deploy(
       16, //MaxReserveCount
-      connector.address,
-    ])) as MoneyPool;
+      connector.address
+    )) as MoneyPool;
 
-    const incentivePool = (await waffle.deployContract(admin, IncentivePoolArtifact, [
+    const incentivePoolFactory = (await ethers.getContractFactory(
+      'IncentivePool'
+    )) as IncentivePool__factory;
+    const incentivePool = (await incentivePoolFactory.deploy(
       moneyPool.address,
       incentiveAsset.address,
-      BigNumber.from(0),
-    ])) as IncentivePool;
+      BigNumber.from(0)
+    )) as IncentivePool;
 
-    const interestRateModel = (await waffle.deployContract(admin, InterestRateModelArtifact, [
+    const interestRateModelFactory = (await ethers.getContractFactory(
+      'InterestRateModel'
+    )) as InterestRateModel__factory;
+    const interestRateModel = (await interestRateModelFactory.deploy(
       toRate(0.8),
       toRate(0.02),
       toRate(0.1),
-      toRate(1),
-    ])) as InterestRateModel;
+      toRate(1)
+    )) as InterestRateModel;
 
-    const lToken = (await waffle.deployContract(admin, LTokenArtifact, [
+    const lTokenFactory = (await ethers.getContractFactory('LToken')) as LToken__factory;
+    const lToken = (await lTokenFactory.deploy(
       moneyPool.address,
       underlyingAsset.address,
+      incentivePool.address,
       'LTokenName',
-      'LTokenSymbol',
-    ])) as LToken;
+      'LTokenSymbol'
+    )) as LToken;
 
-    const dToken = (await waffle.deployContract(admin, DTokenArtifact, [
+    const dTokenFactory = (await ethers.getContractFactory('DToken')) as DToken__factory;
+    const dToken = (await dTokenFactory.deploy(
       moneyPool.address,
       underlyingAsset.address,
       'DTokenName',
-      'DTokenSymbol',
-    ])) as DToken;
+      'DTokenSymbol'
+    )) as DToken;
 
-    const tokenizer = (await waffle.deployContract(admin, TokenizerArtifact, [
+    const tokenizerFactory = (await ethers.getContractFactory('Tokenizer', {
+      libraries: {
+        AssetBond: assetBond.address,
+        Validation: validation.address,
+        TimeConverter: timeConverter.address,
+      },
+    })) as Tokenizer__factory;
+    const tokenizer = (await tokenizerFactory.deploy(
       connector.address,
       moneyPool.address,
       'TokenizerName',
-      'TokenizerSymbol',
-    ])) as Tokenizer;
+      'TokenizerSymbol'
+    )) as Tokenizer;
+    console.log(tokenizer.address);
 
-    const dataPipeline = (await waffle.deployContract(admin, DataPipelineArtifact, [
-      moneyPool.address,
-    ])) as DataPipeline;
+    const dataPipelineFactory = (await ethers.getContractFactory(
+      'DataPipeline'
+    )) as DataPipeline__factory;
+    const dataPipeline = await dataPipelineFactory.deploy(moneyPool.address);
 
     await moneyPool.addNewReserve(
       underlyingAsset.address,
