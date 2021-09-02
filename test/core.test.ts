@@ -1,6 +1,7 @@
 import { loadFixture } from '@ethereum-waffle/provider';
+import { expect } from 'chai';
 import { Wallet } from 'ethers';
-import { waffle, ethers } from 'hardhat';
+import { waffle } from 'hardhat';
 import { TestEnv } from './fixture/testEnv';
 
 describe('core', () => {
@@ -24,16 +25,14 @@ describe('core', () => {
   beforeEach(async () => {
     testEnv = await loadFixture(fixture);
   });
-});
 
-describe('Set executor', async () => {
-  it('success', async () => {});
-  it('reverts if execute canceled proposal', async () => {});
-  it('reverts if execute expired proposal', async () => {});
-  it('reverts if execute queued proposal before timelock', async () => {});
-});
-
-describe('Set', async () => {
-  it('reverts if cancel canceled proposal', async () => {});
-  it('reverts if normal account cancel proposal', async () => {});
+  context('Deploy', async () => {
+    it('deployment check', async () => {
+      expect(await testEnv.core.name()).to.be.equal('ElyfiGovernanceCore');
+      expect(await testEnv.core.timelock()).to.be.equal(testEnv.executor.address);
+      expect(await testEnv.core.votingDelay()).to.be.equal(1); // In the mock core contract
+      expect(await testEnv.core.votingPeriod()).to.be.equal(10); // In the mock core contract
+      expect(await testEnv.core.quorum(0)).to.be.equal(0);
+    });
+  });
 });

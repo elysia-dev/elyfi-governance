@@ -129,6 +129,7 @@ export class TestEnv {
       [],
       stakedElyfiToken.address,
       utils.parseUnits('10000', 18),
+      BigNumber.from(20),
     ])) as Executor;
 
     const core = (await waffle.deployContract(admin, ElyfiGovernanceCoreTestArtifact, [

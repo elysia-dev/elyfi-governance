@@ -3,6 +3,7 @@ import { ethers } from 'hardhat';
 import { BigNumber, Wallet } from 'ethers';
 import { ProposalState } from './enum';
 import { toRate } from './math';
+import { toTimestamp } from './time';
 
 export class AssetBond {
   tokenId: BigNumber;
@@ -48,7 +49,9 @@ export class AssetBond {
 
   public static async assetBondExample(signer: string, borrower: string) {
     return this.createAssetBond(
-      BigNumber.from(0),
+      BigNumber.from(
+        '115792089237316195422007842550160057480242544124026915590235438085798243682305'
+      ),
       signer,
       borrower,
       ethers.utils.parseEther('500000'),
@@ -61,6 +64,10 @@ export class AssetBond {
       BigNumber.from(7),
       'test'
     );
+  }
+
+  public loanStartTimestamp() {
+    return toTimestamp(this.loanStartTimeYear, this.loanStartTimeMonth, this.loanStartTimeDay);
   }
 
   public static async createAssetBond(

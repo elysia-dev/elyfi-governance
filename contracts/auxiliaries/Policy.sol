@@ -19,16 +19,23 @@ contract Policy is IPolicy, AccessControl {
   event MinVotingPowerUpdated(uint256 oldMinVotingPower, uint256 newMinVotingPower);
   event QuorumNumeratorUpdated(uint256 oldQuorumNumerator, uint256 newQuorumNumerator);
 
-  constructor(address token_, uint256 minVotingPower_) {
+  constructor(
+    address token_,
+    uint256 minVotingPower_,
+    uint16 quorumNumerator_
+  ) {
     _setRoleAdmin(POLICY_ADMIN_ROLE, POLICY_ADMIN_ROLE);
     _setRoleAdmin(LENDING_COMPANY_ROLE, POLICY_ADMIN_ROLE);
 
     _setupRole(POLICY_ADMIN_ROLE, address(this));
     _setupRole(POLICY_ADMIN_ROLE, _msgSender());
 
-    _setMinVotingPower(minVotingPower_);
+    _minVotingPower = minVotingPower_;
+    _quorumNumerator = quorumNumerator_;
 
     token = ERC20Votes(token_);
+
+    emit MinVotingPowerUpdated(0, minVotingPower_);
   }
 
   ///////// Main Interfaces

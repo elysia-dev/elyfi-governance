@@ -70,6 +70,5 @@ describe('propose', () => {
         'Governor: empty proposal'
       );
     });
-    it('reverts if mismatch in the number of targets and calldatas', async () => {});
   });
 });

@@ -103,7 +103,7 @@ describe('queue', () => {
         ).to.be.revertedWith('Governor: proposal not successful');
       });
 
-      it('reverts if queue identical proposal', async () => {
+      it('reverts if queue identical proposal twice', async () => {
         await testEnv.core.connect(alice).castVote(proposal.id, VoteType.for);
         await advanceBlockToProposalEnd(proposal);
         await testEnv.expectProposalState(proposal, ProposalState.succeeded);
