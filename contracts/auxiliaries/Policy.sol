@@ -149,12 +149,12 @@ contract Policy is IPolicy, AccessControl {
     return _minVotingPower;
   }
 
-  function setMinVotingPower(uint256 newMinVotingPower) external {
+  function updateMinVotingPower(uint256 newMinVotingPower) external {
     require(hasRole(POLICY_ADMIN_ROLE, msg.sender), 'Policy: Only Policiy Admin');
-    _setMinVotingPower(newMinVotingPower);
+    _updateMinVotingPower(newMinVotingPower);
   }
 
-  function _setMinVotingPower(uint256 newMinVotingPower) internal {
+  function _updateMinVotingPower(uint256 newMinVotingPower) internal {
     _minVotingPower = newMinVotingPower;
     emit MinVotingPowerUpdated(_minVotingPower, newMinVotingPower);
   }

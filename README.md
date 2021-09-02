@@ -11,7 +11,7 @@ yarn
 
 ### Test
 
-Compile and test the smart contracts
+Compile and test the smart contracts:
 
 ```
 yarn hardhat test

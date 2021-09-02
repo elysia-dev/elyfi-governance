@@ -81,6 +81,7 @@ describe('executor', () => {
       ).to.be.true;
       expect(await testEnv.executor.token()).to.be.equal(testEnv.stakedElyfiToken.address);
       expect(await testEnv.executor.minVotingPower()).to.be.equal(utils.parseUnits('10000', 18));
+      expect(await testEnv.executor.minVotingPower()).to.be.equal(utils.parseUnits('10000', 18));
 
       expect(await testEnv.core.timelock()).to.be.equal(testEnv.executor.address);
       expect(await testEnv.core.votingDelay()).to.be.equal(1); // In the mock core contract

@@ -35,6 +35,8 @@ import TimeConverterArtifact from '@elysia-dev/contract-artifacts/artifacts/cont
 import { Contract, BigNumber, utils, Wallet } from 'ethers';
 import { ethers, waffle } from 'hardhat';
 import { toRate } from '../utils/math';
+
+import { ElyfiAssetBond } from '../utils/assetBond';
 // import { testIncentiveAmountPerSecond, testInterestModelParams, testReserveData } from './testData';
 
 export class Elyfi {
@@ -76,16 +78,37 @@ export class Elyfi {
     this.dataPipeline = dataPipeline;
   }
 
-  public async setLendingCompany(accounts: Wallet[]) {
+  public async setLendingCompany(accounts: Wallet[] | Contract[]) {
     for (let account of accounts) {
       await this.connector.connect(this.admin).addCollateralServiceProvider(account.address);
     }
   }
 
-  public async setCouncil(accounts: Wallet[]) {
+  public async setCouncil(accounts: Wallet[] | Contract[]) {
     for (let account of accounts) {
       await this.connector.connect(this.admin).addCouncil(account.address);
     }
+  }
+
+  public async mintAssetBond(minter: Wallet | Contract, assetBond: ElyfiAssetBond) {
+    await this.tokenizer.mintAssetBond(minter.address, assetBond.tokenId);
+  }
+
+  public async settleAssetBond(owner: Wallet | Contract, assetBond: ElyfiAssetBond) {
+    await this.tokenizer.settleAssetBond(
+      assetBond.borrower,
+      assetBond.signer,
+      assetBond.tokenId,
+      assetBond.principal,
+      assetBond.couponRate,
+      assetBond.delinquencyRate,
+      assetBond.debtCeiling,
+      assetBond.loanDuration,
+      assetBond.loanStartTimeYear,
+      assetBond.loanStartTimeMonth,
+      assetBond.loanStartTimeDay,
+      'hash'
+    );
   }
 
   public static async setup(admin: Wallet) {

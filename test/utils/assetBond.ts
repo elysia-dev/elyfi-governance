@@ -5,7 +5,7 @@ import { ProposalState } from './enum';
 import { toRate } from './math';
 import { toTimestamp } from './time';
 
-export class AssetBond {
+export class ElyfiAssetBond {
   tokenId: BigNumber;
   borrower: string;
   signer: string;
@@ -84,7 +84,7 @@ export class AssetBond {
     loanStartTimeDay: BigNumber,
     ipfsHash: string
   ) {
-    return new AssetBond(
+    return new ElyfiAssetBond(
       tokenId,
       borrower,
       signer,
