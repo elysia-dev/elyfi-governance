@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "repository": "https://github.com/elysia-dev/elyfi-governance.git",
-  "author": "jaebok <jaebok.lee@modori.io>",
+  "author": "ELYSIA <support@elysia.land>",
   "license": "MIT",
   "devDependencies": {
     "@elysia-dev/contract-artifacts": "^0.0.5",
