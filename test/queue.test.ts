@@ -98,6 +98,9 @@ describe('queue', () => {
         await advanceBlockToProposalEnd(proposal);
         await testEnv.expectProposalState(proposal, ProposalState.defeated);
         const descriptionHash = utils.keccak256(formatBytesString(proposal.description));
+        await expect(
+          testEnv.core.queue(proposal.targets, proposal.values, proposal.callDatas, descriptionHash)
+        ).to.be.revertedWith('Governor: proposal not successful');
       });
 
       it('reverts if queue identical proposal', async () => {

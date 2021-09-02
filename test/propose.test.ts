@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { Wallet } from 'ethers';
 import { waffle, ethers } from 'hardhat';
 import { TestEnv } from './fixture/testEnv';
-import { VoteType } from './utils/enum';
+import { ProposalState, VoteType } from './utils/enum';
 import { Proposal } from './utils/proposal';
 
 const { loadFixture } = waffle;
@@ -54,8 +54,22 @@ describe('propose', () => {
     ).to.emit(testEnv.core, 'ProposalCreated');
   });
 
+  it('reverts if proposal already exists', async () => {
+    proposal = await testEnv.propose(proposer, proposal);
+    await testEnv.expectProposalState(proposal, ProposalState.active);
+    await expect(
+      testEnv.core
+        .connect(proposer)
+        .propose(proposal.targets, proposal.values, proposal.callDatas, proposal.description)
+    ).to.be.revertedWith('Governor: proposal already exists');
+  });
+
   context('Invalid proposal', async () => {
-    const targets = it('reverts if target is not designated', async () => {});
+    it('reverts if target is not designated', async () => {
+      await expect(testEnv.core.connect(proposer).propose([], [], [], '')).to.be.revertedWith(
+        'Governor: empty proposal'
+      );
+    });
     it('reverts if mismatch in the number of targets and calldatas', async () => {});
   });
 });

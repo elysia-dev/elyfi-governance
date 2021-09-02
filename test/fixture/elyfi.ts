@@ -76,6 +76,18 @@ export class Elyfi {
     this.dataPipeline = dataPipeline;
   }
 
+  public async setLendingCompany(accounts: Wallet[]) {
+    for (let account of accounts) {
+      await this.connector.connect(this.admin).addCollateralServiceProvider(account.address);
+    }
+  }
+
+  public async setCouncil(accounts: Wallet[]) {
+    for (let account of accounts) {
+      await this.connector.connect(this.admin).addCouncil(account.address);
+    }
+  }
+
   public static async setup(admin: Wallet) {
     let validation: Validation;
     const validationFactory = (await ethers.getContractFactory(
