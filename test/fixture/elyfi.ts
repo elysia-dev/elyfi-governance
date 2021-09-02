@@ -30,6 +30,7 @@ import { ethers, waffle } from 'hardhat';
 import { toRate } from '../utils/math';
 
 import { ElyfiAssetBond } from '../utils/assetBond';
+import { getTimestamp } from '../utils/time';
 
 export class Elyfi {
   admin: Wallet;
@@ -109,7 +110,7 @@ export class Elyfi {
     const validationFactory = await ethers.getContractFactory('Validation');
     const validation = (await validationFactory.deploy()) as Validation;
 
-    const timeConverterFactory = await ethers.getContractFactory('Validation');
+    const timeConverterFactory = await ethers.getContractFactory('TimeConverter');
     const timeConverter = (await timeConverterFactory.deploy()) as TimeConverter;
 
     const assetBondFactory = await ethers.getContractFactory('AssetBond', {
@@ -203,7 +204,6 @@ export class Elyfi {
       'TokenizerName',
       'TokenizerSymbol'
     )) as Tokenizer;
-    console.log(tokenizer.address);
 
     const dataPipelineFactory = (await ethers.getContractFactory(
       'DataPipeline'

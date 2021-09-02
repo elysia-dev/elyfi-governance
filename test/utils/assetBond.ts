@@ -59,7 +59,7 @@ export class ElyfiAssetBond {
       toRate(0.1),
       toRate(0.03),
       BigNumber.from(365),
-      BigNumber.from(2022),
+      BigNumber.from(2030),
       BigNumber.from(7),
       BigNumber.from(7),
       'test'
