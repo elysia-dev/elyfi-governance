@@ -44,7 +44,7 @@ describe('state', () => {
       testEnv.core.interface.encodeFunctionData('castVote', [proposalId, VoteType.for]),
     ];
 
-    proposal = await Proposal.createProposal(targets, values, calldatas, 'description');
+    proposal = await Proposal.createProposal(targets, values, calldatas, 'description for apple');
   });
 
   after(async () => {
@@ -55,16 +55,23 @@ describe('state', () => {
     beforeEach('propose', async () => {
       proposal = await testEnv.propose(proposer, proposal);
     });
+
     it('active', async () => {
       await testEnv.expectProposalState(proposal, ProposalState.active);
     });
-    it('succeeded', async () => {
+
+    it.only('succeeded & queued', async () => {
       await testEnv.core.connect(alice).castVote(proposal.id, VoteType.for);
       await advanceBlockToProposalEnd(proposal);
       await testEnv.expectProposalState(proposal, ProposalState.succeeded);
+      await testEnv.queue(proposal);
+      await testEnv.expectProposalState(proposal, ProposalState.queued);
     });
-    it('vote fails if against exceeds for', async () => {
+
+    it('defeated', async () => {
+      //for
       await testEnv.core.connect(alice).castVote(proposal.id, VoteType.for);
+      //against
       await testEnv.core.connect(bob).castVote(proposal.id, VoteType.against);
       await testEnv.core.connect(carol).castVote(proposal.id, VoteType.against);
       await advanceBlockToProposalEnd(proposal);

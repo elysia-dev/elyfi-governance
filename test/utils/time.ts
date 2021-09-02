@@ -29,11 +29,13 @@ export async function advanceTimeTo(current: BigNumber, target: BigNumber) {
 }
 
 export async function advanceBlockTo(to: number) {
-  return await waffle.provider.send('evm_mineBlockNumber', [to]);
+  for (let i = await waffle.provider.getBlockNumber(); i < to; i++) {
+    await advanceBlock();
+  }
 }
 
 export async function advanceBlockToProposalEnd(proposal: Proposal) {
-  return await waffle.provider.send('evm_mineBlockNumber', [proposal.endBlock]);
+  await advanceBlockTo(proposal.endBlock.toNumber());
 }
 
 export async function saveEVMSnapshot(): Promise<string> {

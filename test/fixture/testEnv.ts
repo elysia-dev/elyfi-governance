@@ -20,6 +20,8 @@ import { expect } from 'chai';
 
 import { Result } from '@ethersproject/abi';
 import { advanceBlock, advanceTimeTo, getTimestamp, toTimestamp } from '../utils/time';
+import { formatBytes32String, parseBytes32String } from '@ethersproject/strings';
+import { formatBytesString } from '../utils/bytes';
 
 export class TestEnv {
   admin: Wallet;
@@ -28,7 +30,6 @@ export class TestEnv {
   elyfiToken: ERC20Test;
   stakedElyfiToken: Contract;
   elyfi: Elyfi | undefined;
-  nonce: number;
 
   constructor(
     admin: Wallet,
@@ -44,7 +45,6 @@ export class TestEnv {
     this.elyfiToken = elyfiToken;
     this.stakedElyfiToken = stakedElyfiToken;
     this.elyfi = elyfi;
-    this.nonce = 0;
   }
 
   public async setVoters(accounts: Wallet[]) {
@@ -94,11 +94,13 @@ export class TestEnv {
     createdProposal.endBlock = result['endBlock'];
 
     await advanceBlock();
-    await advanceBlock();
-
-    this.nonce++;
 
     return createdProposal;
+  }
+
+  public async queue(proposal: Proposal) {
+    const descriptionHash = utils.keccak256(formatBytesString(proposal.description));
+    await this.core.queue(proposal.targets, proposal.values, proposal.callDatas, descriptionHash);
   }
 
   public static async setup(admin: Wallet, setupElyfi?: Boolean) {
@@ -132,7 +134,7 @@ export class TestEnv {
     const core = (await waffle.deployContract(admin, ElyfiGovernanceCoreTestArtifact, [
       executor.address,
       1,
-      4,
+      10,
     ])) as ElyfiGovernanceCoreTest;
 
     await executor.init(core.address);

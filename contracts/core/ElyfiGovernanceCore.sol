@@ -87,7 +87,6 @@ contract ElyfiGovernanceCore is Governor, GovernorTimelockControl {
     uint8 support,
     uint256 weight
   ) internal virtual override {
-    console.log(account);
     require(
       _policy.validateVoter(account, proposalSnapshot(proposalId)),
       'ElyfiGovernor: Invalid Voter'
