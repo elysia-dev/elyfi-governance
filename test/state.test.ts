@@ -60,7 +60,7 @@ describe('state', () => {
       await testEnv.expectProposalState(proposal, ProposalState.active);
     });
 
-    it.only('succeeded & queued', async () => {
+    it('succeeded & queued', async () => {
       await testEnv.core.connect(alice).castVote(proposal.id, VoteType.for);
       await advanceBlockToProposalEnd(proposal);
       await testEnv.expectProposalState(proposal, ProposalState.succeeded);

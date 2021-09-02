@@ -50,3 +50,7 @@ export async function revertFromEVMSnapshot(snapshotId: string) {
 export async function getTimestamp(tx: any) {
   return BigNumber.from((await waffle.provider.getBlock(tx.blockNumber)).timestamp);
 }
+
+export async function getBlockNumber(tx: any) {
+  return BigNumber.from((await waffle.provider.getBlock(tx.blockNumber)).timestamp);
+}
