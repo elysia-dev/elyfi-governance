@@ -90,6 +90,7 @@ export class TestEnv {
     createdProposal.id = result['proposalId'];
     createdProposal.startBlock = result['startBlock'];
     createdProposal.endBlock = result['endBlock'];
+    createdProposal.delay = await this.executor.getMinDelay();
 
     await advanceBlock();
 
@@ -107,7 +108,7 @@ export class TestEnv {
     );
 
     const events = (await queueTx.wait()).events as Array<Event>;
-    const result = events[0].args as Result;
+    const result = events[1].args as Result;
 
     queuedProposal.eta = result['eta'];
 
@@ -116,7 +117,12 @@ export class TestEnv {
 
   public async execute(proposal: Proposal) {
     const descriptionHash = utils.keccak256(formatBytesString(proposal.description));
-    await this.core.execute(proposal.targets, proposal.values, proposal.callDatas, descriptionHash);
+    return await this.core.execute(
+      proposal.targets,
+      proposal.values,
+      proposal.callDatas,
+      descriptionHash
+    );
   }
 
   public static async setup(admin: Wallet, setupElyfi?: Boolean) {

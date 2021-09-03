@@ -11,6 +11,7 @@ export class Proposal {
   startBlock: BigNumber;
   endBlock: BigNumber;
   eta?: BigNumber;
+  delay: BigNumber;
 
   constructor(targets: string[], values: BigNumber[], callDatas: string[], description: string) {
     this.targets = targets;
@@ -21,6 +22,7 @@ export class Proposal {
     this.state = ProposalState.active;
     this.startBlock = BigNumber.from(0);
     this.endBlock = BigNumber.from(0);
+    this.delay = BigNumber.from(0);
   }
 
   public static async createProposal(

@@ -6,10 +6,7 @@ import { TestEnv } from './fixture/testEnv';
 import { ProposalState, VoteType } from './utils/enum';
 import { Proposal } from './utils/proposal';
 
-import { buildBallotData, buildDelegationData, getSignatureFromTypedData } from './utils/signature';
-import { MAX_UINT_AMOUNT } from './utils/math';
 import { Elyfi } from './fixture/elyfi';
-import { AssetBond } from '@elysia-dev/contract-typechain';
 import { ElyfiAssetBond } from './utils/assetBond';
 import { advanceBlockToProposalEnd } from './utils/time';
 
@@ -49,6 +46,7 @@ describe('scenario', () => {
   context('Elyfi:Tokenizer', async () => {
     let assetBond: ElyfiAssetBond;
     let proposal: Proposal;
+
     beforeEach('set', async () => {
       await elyfi.setLendingCompany([lendingCompany]);
       await elyfi.setCouncil([testEnv.executor]);
@@ -63,14 +61,20 @@ describe('scenario', () => {
       ];
       proposal = await Proposal.createProposal(targets, values, calldatas, 'description');
     });
+
     it('signAssetBond, propose:vote:queue:excute, success', async () => {
       proposal = await testEnv.propose(proposer, proposal);
       await testEnv.expectProposalState(proposal, ProposalState.active);
       await testEnv.core.connect(voter).castVote(proposal.id, VoteType.for);
       await advanceBlockToProposalEnd(proposal);
       await testEnv.expectProposalState(proposal, ProposalState.succeeded);
-      await testEnv.queue(proposal);
-      await testEnv.expectProposalState(proposal, ProposalState.queued);
+      const queuedproposal = await testEnv.queue(proposal);
+      await testEnv.expectProposalState(queuedproposal, ProposalState.queued);
+      console.log(testEnv.executor.address);
+      const executeTx = await testEnv.execute(queuedproposal);
+      await expect(executeTx)
+        .to.emit(elyfi.tokenizer, 'AssetBondSigned')
+        .withArgs(testEnv.executor.address, queuedproposal.id, 'hash');
     });
   });
   context('Elyfi:GovernanceCore', async () => {

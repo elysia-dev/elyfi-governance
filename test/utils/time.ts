@@ -40,7 +40,9 @@ export async function advanceBlockToProposalEnd(proposal: Proposal) {
 }
 
 export async function advanceBlockToTimelockDelayEnd(proposal: Proposal) {
-  await advanceBlockTo(proposal.endBlock.toNumber());
+  const secondsToIncrease = proposal.delay.toNumber();
+  await waffle.provider.send('evm_increaseTime', [secondsToIncrease]);
+  return await waffle.provider.send('evm_mine', []);
 }
 
 export async function saveEVMSnapshot(): Promise<string> {

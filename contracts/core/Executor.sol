@@ -27,6 +27,7 @@ contract Executor is TimelockController, Policy {
   function init(address governanceCore) public {
     grantRole(POLICY_ADMIN_ROLE, governanceCore);
     grantRole(PROPOSER_ROLE, governanceCore);
+    grantRole(EXECUTOR_ROLE, address(0));
     emit ExecutorInitialized();
   }
 
