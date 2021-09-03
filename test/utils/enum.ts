@@ -14,3 +14,13 @@ export enum VoteType {
   for,
   abstain,
 }
+
+export enum AssetBondState {
+  EMPTY,
+  SETTLED,
+  CONFIRMED,
+  COLLATERALIZED,
+  DELINQUENT,
+  REDEEMED,
+  LIQUIDATED,
+}

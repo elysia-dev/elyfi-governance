@@ -1,5 +1,5 @@
 import { BigNumber } from 'ethers';
-import { waffle } from 'hardhat';
+import { waffle, ethers } from 'hardhat';
 import { Executor } from '../../typechain';
 import { Proposal } from './proposal';
 
@@ -18,28 +18,35 @@ export async function advanceBlock() {
   return waffle.provider.send('evm_mine', []);
 }
 
-export async function advanceTime(secondsToIncrease: number) {
-  await waffle.provider.send('evm_increaseTime', [secondsToIncrease]);
-  return await waffle.provider.send('evm_mine', []);
-}
-
-export async function advanceTimeTo(current: BigNumber, target: BigNumber) {
-  const secondsToIncrease = target.sub(current).toNumber();
-  await waffle.provider.send('evm_increaseTime', [secondsToIncrease]);
-  return await waffle.provider.send('evm_mine', []);
-}
-
 export async function advanceBlockTo(to: number) {
   for (let i = await waffle.provider.getBlockNumber(); i < to; i++) {
     await advanceBlock();
   }
 }
 
+export async function advanceBlockFromTo(from: number, to: number) {
+  for (let i = from; i < to; i++) {
+    await advanceBlock();
+  }
+}
+
+export async function advanceTime(secondsToIncrease: number) {
+  await waffle.provider.send('evm_increaseTime', [secondsToIncrease]);
+  return await advanceBlock();
+}
+
+export async function advanceTimeTo(current: BigNumber, target: BigNumber) {
+  const secondsToIncrease = target.sub(current).toNumber();
+  await waffle.provider.send('evm_increaseTime', [secondsToIncrease]);
+  return await advanceBlock();
+}
+
+// fixture can't clean the provider blockNumber because of the cached block data by ethers.
 export async function advanceBlockToProposalEnd(proposal: Proposal) {
   await advanceBlockTo(proposal.endBlock.toNumber());
 }
 
-export async function advanceBlockToTimelockDelayEnd(proposal: Proposal) {
+export async function advanceTimeToProposalEta(proposal: Proposal) {
   const secondsToIncrease = proposal.delay.toNumber();
   await waffle.provider.send('evm_increaseTime', [secondsToIncrease]);
   return await waffle.provider.send('evm_mine', []);

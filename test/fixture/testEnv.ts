@@ -50,8 +50,10 @@ export class TestEnv {
     for (let account of accounts) {
       await this.elyfiToken.connect(account).faucet();
       const balance = await this.elyfiToken.balanceOf(account.address);
-      await this.elyfiToken.connect(account).approve(this.stakedElyfiToken.address, balance);
-      await this.stakedElyfiToken.connect(account).stake(balance);
+      const tx = await this.elyfiToken
+        .connect(account)
+        .approve(this.stakedElyfiToken.address, balance);
+      const txtx = await this.stakedElyfiToken.connect(account).stake(balance);
       await this.stakedElyfiToken.connect(account).delegate(account.address);
     }
   }

@@ -3,12 +3,18 @@ import { expect } from 'chai';
 import { Contract, Wallet } from 'ethers';
 import { waffle, ethers } from 'hardhat';
 import { TestEnv } from './fixture/testEnv';
-import { ProposalState, VoteType } from './utils/enum';
+import { AssetBondState, ProposalState, VoteType } from './utils/enum';
 import { Proposal } from './utils/proposal';
 
 import { Elyfi } from './fixture/elyfi';
 import { ElyfiAssetBond } from './utils/assetBond';
-import { advanceBlockToProposalEnd } from './utils/time';
+import {
+  advanceBlock,
+  advanceBlockFromTo,
+  advanceBlockToProposalEnd,
+  advanceTimeToProposalEta,
+  getTimestamp,
+} from './utils/time';
 
 const { loadFixture } = waffle;
 
@@ -25,12 +31,10 @@ describe('scenario', () => {
   async function fixture() {
     const testEnv = await TestEnv.setup(admin, true);
     await testEnv.setProposers([proposer]);
-    await testEnv.setVoters([voter]);
     return testEnv;
   }
 
   before(async () => {
-    chainId = (await waffle.provider.getNetwork()).chainId;
     [admin, proposer, lendingCompany, voter, borrower] = waffle.provider.getWallets();
   });
 
@@ -43,17 +47,21 @@ describe('scenario', () => {
     await loadFixture(fixture);
   });
 
-  context('Elyfi:Tokenizer', async () => {
+  context('Elyfi:Tokenizer, signAssetBond, propose:vote:queue:excute, ', async () => {
     let assetBond: ElyfiAssetBond;
     let proposal: Proposal;
 
     beforeEach('set', async () => {
+      await testEnv.setVoters([voter]);
       await elyfi.setLendingCompany([lendingCompany]);
       await elyfi.setCouncil([testEnv.executor]);
       assetBond = await ElyfiAssetBond.assetBondExample(testEnv.executor.address, borrower.address);
       await elyfi.mintAssetBond(lendingCompany, assetBond);
       await elyfi.settleAssetBond(lendingCompany, assetBond);
-
+      expect((await elyfi.tokenizer.getAssetBondData(assetBond.tokenId)).state).to.be.equal(
+        AssetBondState.SETTLED
+      );
+      // signAssetBond
       const targets = [elyfi.tokenizer.address];
       const values = [BigNumber.from(0)];
       const calldatas = [
@@ -62,28 +70,62 @@ describe('scenario', () => {
       proposal = await Proposal.createProposal(targets, values, calldatas, 'description');
     });
 
-    it('signAssetBond, propose:vote:queue:excute, success', async () => {
+    it('success', async () => {
+      await testEnv.setVoters([voter]);
+      // propose
       proposal = await testEnv.propose(proposer, proposal);
       await testEnv.expectProposalState(proposal, ProposalState.active);
-      await testEnv.core.connect(voter).castVote(proposal.id, VoteType.for);
-      await advanceBlockToProposalEnd(proposal);
+      // vote
+      const tx = await testEnv.core.connect(voter).castVote(proposal.id, VoteType.for);
+      await advanceBlockFromTo((await tx.wait()).blockNumber, proposal.endBlock.toNumber());
       await testEnv.expectProposalState(proposal, ProposalState.succeeded);
+      // queue
       const queuedproposal = await testEnv.queue(proposal);
       await testEnv.expectProposalState(queuedproposal, ProposalState.queued);
-      console.log(testEnv.executor.address);
+      await advanceTimeToProposalEta(proposal);
+      // execute
       const executeTx = await testEnv.execute(queuedproposal);
       await expect(executeTx)
         .to.emit(elyfi.tokenizer, 'AssetBondSigned')
-        .withArgs(testEnv.executor.address, queuedproposal.id, 'hash');
+        .withArgs(testEnv.executor.address, assetBond.tokenId, 'hash');
+      expect((await elyfi.tokenizer.getAssetBondData(assetBond.tokenId)).state).to.be.equal(
+        AssetBondState.CONFIRMED
+      );
     });
   });
-  context('Elyfi:GovernanceCore', async () => {
-    it('grantRole, propose:vote:queue:excute, success');
+  context('Elyfi:TimelockController, grantRole, propose:vote:queue:excute', async () => {
+    let role: string;
+    let proposal: Proposal;
+
+    beforeEach('set', async () => {
+      role = await testEnv.executor.LENDING_COMPANY_ROLE();
+      const targets = [testEnv.executor.address];
+      const values = [BigNumber.from(0)];
+      const calldatas = [
+        testEnv.executor.interface.encodeFunctionData('grantRole', [role, lendingCompany.address]),
+      ];
+      proposal = await Proposal.createProposal(targets, values, calldatas, 'description');
+    });
+    it('success', async () => {
+      await testEnv.setVoters([voter]);
+      proposal = await testEnv.propose(proposer, proposal);
+      await testEnv.expectProposalState(proposal, ProposalState.active);
+      // vote
+      const tx = await testEnv.core.connect(voter).castVote(proposal.id, VoteType.for);
+      await advanceBlockFromTo((await tx.wait()).blockNumber, proposal.endBlock.toNumber());
+      await testEnv.expectProposalState(proposal, ProposalState.succeeded);
+      // queue
+      const queuedproposal = await testEnv.queue(proposal);
+      await testEnv.expectProposalState(queuedproposal, ProposalState.queued);
+      await advanceTimeToProposalEta(proposal);
+      // execute
+      const executeTx = await testEnv.execute(queuedproposal);
+      await expect(executeTx)
+        .to.emit(testEnv.executor, 'RoleGranted')
+        .withArgs(role, lendingCompany.address, testEnv.executor.address);
+    });
   });
-  context('Elyfi:TimelockController', async () => {
-    it('updateDelay, propose:vote:queue:excute, success');
-  });
-  context('Elyfi:MoneyPool', async () => {
-    it('addNewReserve, propose:vote:queue:excute, revert with no authority in executor');
+  context('Elyfi:TimelockController, updateDelay, propose:vote:queue:excute', async () => {
+    it('success');
   });
 });
