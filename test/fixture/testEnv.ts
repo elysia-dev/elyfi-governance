@@ -78,9 +78,8 @@ export class TestEnv {
     expect(proposalState).to.be.equal(state);
   }
 
-  public async propose(proposer: Wallet, proposal: Proposal) {
+  public async propose(proposer: Wallet, proposal: Proposal): Promise<Proposal> {
     const createdProposal = { ...proposal } as Proposal;
-
     const proposalTx = await this.core
       .connect(proposer)
       .propose(proposal.targets, proposal.values, proposal.callDatas, proposal.description);
@@ -97,7 +96,7 @@ export class TestEnv {
     return createdProposal;
   }
 
-  public async queue(proposal: Proposal) {
+  public async queue(proposal: Proposal): Promise<Proposal> {
     const queuedProposal = { ...proposal } as Proposal;
     const descriptionHash = utils.keccak256(formatBytesString(proposal.description));
     const queueTx = await this.core.queue(
@@ -110,7 +109,9 @@ export class TestEnv {
     const events = (await queueTx.wait()).events as Array<Event>;
     const result = events[0].args as Result;
 
-    queuedProposal.delay = result['proposalId'];
+    queuedProposal.eta = result['eta'];
+
+    return queuedProposal;
   }
 
   public async execute(proposal: Proposal) {

@@ -10,7 +10,7 @@ export class Proposal {
   state: ProposalState;
   startBlock: BigNumber;
   endBlock: BigNumber;
-  delay?: BigNumber;
+  eta?: BigNumber;
 
   constructor(targets: string[], values: BigNumber[], callDatas: string[], description: string) {
     this.targets = targets;
