@@ -1,5 +1,3 @@
-import { Bytes } from '@ethersproject/bytes';
-import { ethers } from 'hardhat';
 import { BigNumber } from 'ethers';
 import { ProposalState } from './enum';
 
@@ -12,6 +10,7 @@ export class Proposal {
   state: ProposalState;
   startBlock: BigNumber;
   endBlock: BigNumber;
+  delay?: BigNumber;
 
   constructor(targets: string[], values: BigNumber[], callDatas: string[], description: string) {
     this.targets = targets;

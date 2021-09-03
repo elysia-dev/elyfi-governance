@@ -1,5 +1,6 @@
 import { BigNumber } from 'ethers';
 import { waffle } from 'hardhat';
+import { Executor } from '../../typechain';
 import { Proposal } from './proposal';
 
 export function toTimestamp(year: BigNumber, month: BigNumber, day: BigNumber, hour?: BigNumber) {
@@ -35,6 +36,10 @@ export async function advanceBlockTo(to: number) {
 }
 
 export async function advanceBlockToProposalEnd(proposal: Proposal) {
+  await advanceBlockTo(proposal.endBlock.toNumber());
+}
+
+export async function advanceBlockToTimelockDelayEnd(proposal: Proposal) {
   await advanceBlockTo(proposal.endBlock.toNumber());
 }
 

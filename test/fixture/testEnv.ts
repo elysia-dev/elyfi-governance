@@ -1,6 +1,6 @@
-import { ElyfiGovernanceCoreTest, ERC20Votes, Executor } from '../../typechain';
+import { ElyfiGovernanceCoreTest, Executor } from '../../typechain';
 
-import { Connector, Tokenizer, StakingPool, ERC20Test } from '@elysia-dev/contract-typechain';
+import { ERC20Test } from '@elysia-dev/contract-typechain';
 
 import { Elyfi } from './elyfi';
 import { waffle } from 'hardhat';
@@ -20,7 +20,6 @@ import { expect } from 'chai';
 
 import { Result } from '@ethersproject/abi';
 import { advanceBlock, advanceTimeTo, getTimestamp, toTimestamp } from '../utils/time';
-import { formatBytes32String, parseBytes32String } from '@ethersproject/strings';
 import { formatBytesString } from '../utils/bytes';
 
 export class TestEnv {
@@ -99,8 +98,24 @@ export class TestEnv {
   }
 
   public async queue(proposal: Proposal) {
+    const queuedProposal = { ...proposal } as Proposal;
     const descriptionHash = utils.keccak256(formatBytesString(proposal.description));
-    await this.core.queue(proposal.targets, proposal.values, proposal.callDatas, descriptionHash);
+    const queueTx = await this.core.queue(
+      proposal.targets,
+      proposal.values,
+      proposal.callDatas,
+      descriptionHash
+    );
+
+    const events = (await queueTx.wait()).events as Array<Event>;
+    const result = events[0].args as Result;
+
+    queuedProposal.delay = result['proposalId'];
+  }
+
+  public async execute(proposal: Proposal) {
+    const descriptionHash = utils.keccak256(formatBytesString(proposal.description));
+    await this.core.execute(proposal.targets, proposal.values, proposal.callDatas, descriptionHash);
   }
 
   public static async setup(admin: Wallet, setupElyfi?: Boolean) {
