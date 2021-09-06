@@ -56,7 +56,7 @@ contract Policy is IPolicy, AccessControl {
   }
 
   /// @notice Check whether voter can vote on the proposal at the end of the blockNumber
-  /// @dev Voter ... TODO : set requirements for the voter
+  /// @dev Voting power should be over the
   /// @param account The voter address
   /// @param blockNumber The past blocknumber
   function validateVoter(address account, uint256 blockNumber)
