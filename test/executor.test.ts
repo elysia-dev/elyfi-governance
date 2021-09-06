@@ -6,9 +6,6 @@ import { TestEnv } from './fixture/testEnv';
 import { VoteType } from './utils/enum';
 import { Proposal } from './utils/proposal';
 
-import { buildBallotData, buildDelegationData, getSignatureFromTypedData } from './utils/signature';
-import { MAX_UINT_AMOUNT } from './utils/math';
-
 const { loadFixture } = waffle;
 
 describe('executor', () => {
@@ -66,7 +63,7 @@ describe('executor', () => {
       ).to.be.true;
       expect(await testEnv.executor.getMinDelay()).to.be.equal(6400);
     });
-    it('deployment check in TimelockController', async () => {
+    it('deployment check in Policy', async () => {
       expect(
         await testEnv.executor.hasRole(
           await testEnv.executor.POLICY_ADMIN_ROLE(),

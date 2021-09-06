@@ -24,7 +24,7 @@ describe('vote', () => {
   async function fixture() {
     const testEnv = await TestEnv.setup(admin, false);
     await testEnv.setProposers([proposer]);
-    await testEnv.setStakers([alice, bob, carol]);
+    await testEnv.setStakers([alice, bob]);
     return testEnv;
   }
 
@@ -36,13 +36,14 @@ describe('vote', () => {
   beforeEach(async () => {
     testEnv = await loadFixture(fixture);
 
-    const proposalId = BigNumber.from('1234');
-    const targets = [testEnv.core.address];
+    const targets = [testEnv.executor.address];
     const values = [BigNumber.from(0)];
     const calldatas = [
-      testEnv.core.interface.encodeFunctionData('castVote', [proposalId, VoteType.for]),
+      testEnv.executor.interface.encodeFunctionData('grantRole', [
+        await testEnv.executor.LENDING_COMPANY_ROLE(),
+        carol.address,
+      ]),
     ];
-
     proposal = await Proposal.createProposal(targets, values, calldatas, 'description');
   });
 
@@ -80,6 +81,7 @@ describe('vote', () => {
 
   context('vote via signature', async () => {
     let votingPower: BigNumber;
+
     beforeEach('voting power delegation via signature', async () => {
       const nonce = '0';
       const data = buildDelegationData(
@@ -144,7 +146,4 @@ describe('vote', () => {
       ).to.be.reverted;
     });
   });
-
-  it('vote fails if not exceeds quorum', async () => {});
-  it('vote fails if against exceeds for', async () => {});
 });
