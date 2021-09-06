@@ -3,7 +3,7 @@ import { Wallet } from 'ethers';
 import { waffle, ethers } from 'hardhat';
 import { TestEnv } from './fixture/testEnv';
 
-describe('core', () => {
+describe('execute', () => {
   let admin: Wallet;
   let proposer: Wallet;
   let voter: Wallet;

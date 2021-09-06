@@ -47,6 +47,7 @@ contract Policy is IPolicy, AccessControl {
   function validateProposer(address account, uint256 blockNumber)
     external
     view
+    virtual
     override
     returns (bool)
   {
@@ -61,6 +62,7 @@ contract Policy is IPolicy, AccessControl {
   function validateVoter(address account, uint256 blockNumber)
     external
     view
+    virtual
     override
     returns (bool)
   {
@@ -73,6 +75,7 @@ contract Policy is IPolicy, AccessControl {
   function voteSucceeded(DataStruct.ProposalVote memory proposalVote)
     external
     view
+    virtual
     override
     returns (bool)
   {
@@ -120,14 +123,12 @@ contract Policy is IPolicy, AccessControl {
   /// @notice Returns whether the casted vote in the proposal exceeds quorum
   /// @param newQuorumNumerator The new quorum numerator
   function updateQuorumNumerator(uint256 newQuorumNumerator) external virtual {
+    require(hasRole(POLICY_ADMIN_ROLE, msg.sender), 'Only Policy Admin');
     _updateQuorumNumerator(newQuorumNumerator);
   }
 
   function _updateQuorumNumerator(uint256 newQuorumNumerator) internal virtual {
-    require(
-      newQuorumNumerator <= quorumDenominator(),
-      'Policy: quorumNumerator over quorumDenominator'
-    );
+    require(newQuorumNumerator <= quorumDenominator(), 'QuorumNumerator over QuorumDenominator');
 
     uint256 oldQuorumNumerator = _quorumNumerator;
     _quorumNumerator = newQuorumNumerator;
@@ -150,12 +151,16 @@ contract Policy is IPolicy, AccessControl {
   }
 
   function updateMinVotingPower(uint256 newMinVotingPower) external {
-    require(hasRole(POLICY_ADMIN_ROLE, msg.sender), 'Policy: Only Policiy Admin');
+    require(hasRole(POLICY_ADMIN_ROLE, msg.sender), 'Only Policy Admin');
     _updateMinVotingPower(newMinVotingPower);
   }
 
   function _updateMinVotingPower(uint256 newMinVotingPower) internal {
+    require(newMinVotingPower <= token.totalSupply(), 'VotingPower over TotalSupply');
+
+    uint256 oldMinVotingPower = _minVotingPower;
     _minVotingPower = newMinVotingPower;
-    emit MinVotingPowerUpdated(_minVotingPower, newMinVotingPower);
+
+    emit MinVotingPowerUpdated(oldMinVotingPower, newMinVotingPower);
   }
 }
