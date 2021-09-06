@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "coverage": "yarn hardhat coverage --testfiles 'test/contracts/**/*.test.ts' --solcoverjs ./.solcover.js"
+  },
   "name": "elyfi-governance",
   "version": "1.0.0",
   "main": "index.js",
@@ -26,6 +29,7 @@
     "hardhat-deploy": "^0.7.10",
     "hardhat-deploy-ethers": "^0.3.0-beta.8",
     "mocha": "^8.3.2",
+    "solidity-coverage": "^0.7.17",
     "ts-generator": "^0.1.1",
     "ts-node": "^9.1.1",
     "typechain": "^5.1.2",

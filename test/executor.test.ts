@@ -63,27 +63,9 @@ describe('executor', () => {
       ).to.be.true;
       expect(await testEnv.executor.getMinDelay()).to.be.equal(6400);
     });
-    it('deployment check in Policy', async () => {
-      expect(
-        await testEnv.executor.hasRole(
-          await testEnv.executor.POLICY_ADMIN_ROLE(),
-          testEnv.admin.address
-        )
-      ).to.be.true;
-      expect(
-        await testEnv.executor.hasRole(
-          await testEnv.executor.POLICY_ADMIN_ROLE(),
-          testEnv.executor.address
-        )
-      ).to.be.true;
-      expect(await testEnv.executor.token()).to.be.equal(testEnv.stakedElyfiToken.address);
-      expect(await testEnv.executor.minVotingPower()).to.be.equal(utils.parseUnits('10000', 18));
-      expect(await testEnv.executor.minVotingPower()).to.be.equal(utils.parseUnits('10000', 18));
+  });
 
-      expect(await testEnv.core.timelock()).to.be.equal(testEnv.executor.address);
-      expect(await testEnv.core.votingDelay()).to.be.equal(1); // In the mock core contract
-      expect(await testEnv.core.votingPeriod()).to.be.equal(10); // In the mock core contract
-      expect(await testEnv.core.quorum(0)).to.be.equal(0);
-    });
+  context('', async () => {
+    it('', async () => {});
   });
 });

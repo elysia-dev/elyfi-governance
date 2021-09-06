@@ -112,6 +112,7 @@ describe('vote', () => {
       await expect(tx)
         .to.emit(testEnv.core, 'VoteCast')
         .withArgs(alice.address, proposal.id, VoteType.for, votingPower, '');
+      expect(await testEnv.core.hasVoted(proposal.id, alice.address)).to.be.true;
     });
 
     it('cast vote via signature and success', async () => {
@@ -129,6 +130,7 @@ describe('vote', () => {
       await expect(tx)
         .to.emit(testEnv.core, 'VoteCast')
         .withArgs(alice.address, proposal.id, VoteType.for, votingPower, '');
+      expect(await testEnv.core.hasVoted(proposal.id, alice.address)).to.be.true;
     });
 
     it('reverts if vote via delegation but invaild signature', async () => {

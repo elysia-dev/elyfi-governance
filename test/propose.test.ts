@@ -16,26 +16,32 @@ describe('propose', () => {
   let proposal: Proposal;
 
   async function fixture() {
-    return await TestEnv.setup(admin, false);
+    const testEnv = await TestEnv.setup(admin, false);
+    await testEnv.setProposers([proposer]);
+    await testEnv.setStakers([voter]);
+    return testEnv;
   }
 
   before(async () => {
     [admin, proposer, voter] = waffle.provider.getWallets();
   });
 
-  after(async () => {
-    await loadFixture(fixture);
-  });
-
   beforeEach(async () => {
     testEnv = await loadFixture(fixture);
-    const proposalId = BigNumber.from('1234');
-    const targets = [testEnv.core.address];
+
+    const targets = [testEnv.executor.address];
     const values = [BigNumber.from(0)];
     const calldatas = [
-      testEnv.core.interface.encodeFunctionData('castVote', [proposalId, VoteType.for]),
+      testEnv.executor.interface.encodeFunctionData('grantRole', [
+        await testEnv.executor.LENDING_COMPANY_ROLE(),
+        voter.address,
+      ]),
     ];
     proposal = await Proposal.createProposal(targets, values, calldatas, 'description');
+  });
+
+  after(async () => {
+    await loadFixture(fixture);
   });
 
   it('reverts if proposer has not been authorized', async () => {

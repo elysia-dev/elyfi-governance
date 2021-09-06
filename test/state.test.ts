@@ -101,7 +101,7 @@ describe('state', () => {
   context('state after vote', async () => {
     beforeEach('vote success', async () => {
       proposal = await testEnv.propose(proposer, proposal);
-      const tx = await testEnv.core.connect(alice).castVote(proposal.id, VoteType.against);
+      const tx = await testEnv.core.connect(alice).castVote(proposal.id, VoteType.for);
       await advanceBlockFromTo((await tx.wait()).blockNumber, proposal.endBlock.toNumber());
     });
 
