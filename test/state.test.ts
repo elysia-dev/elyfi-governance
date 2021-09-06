@@ -1,14 +1,12 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { utils, Wallet } from 'ethers';
 import { waffle } from 'hardhat';
+
 import { TestEnv } from './fixture/testEnv';
+
 import { ProposalState, VoteType } from './utils/enum';
 import { Proposal } from './utils/proposal';
-import {
-  advanceBlockFromTo,
-  advanceBlockToProposalEnd,
-  advanceTimeToProposalEta,
-} from './utils/time';
+import { advanceBlockFromTo, advanceTimeToProposalEta } from './utils/time';
 
 const { loadFixture } = waffle;
 
@@ -105,18 +103,12 @@ describe('state', () => {
       await advanceBlockFromTo((await tx.wait()).blockNumber, proposal.endBlock.toNumber());
     });
 
-    it('queued & success', async () => {
+    it('queued and executed', async () => {
       const queuedproposal = await testEnv.queue(proposal);
       await testEnv.expectProposalState(queuedproposal, ProposalState.queued);
       await advanceTimeToProposalEta(proposal);
-      await testEnv.expectProposalState(proposal, ProposalState.defeated);
-    });
-
-    it('queued', async () => {
-      const queuedproposal = await testEnv.queue(proposal);
-      await testEnv.expectProposalState(queuedproposal, ProposalState.queued);
-      await advanceTimeToProposalEta(proposal);
-      await testEnv.expectProposalState(proposal, ProposalState.defeated);
+      await testEnv.execute(queuedproposal);
+      await testEnv.expectProposalState(proposal, ProposalState.executed);
     });
   });
 });

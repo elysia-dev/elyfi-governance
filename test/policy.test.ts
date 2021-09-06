@@ -1,8 +1,10 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { expect } from 'chai';
-import { Contract, Wallet, utils } from 'ethers';
-import { waffle, ethers } from 'hardhat';
+import { Wallet, utils } from 'ethers';
+import { waffle } from 'hardhat';
+
 import { TestEnv } from './fixture/testEnv';
+
 import { VoteType } from './utils/enum';
 import { Proposal } from './utils/proposal';
 
@@ -103,6 +105,7 @@ describe('policy', () => {
         ]),
       ];
       proposal = await Proposal.createProposal(targets, values, calldatas, 'description');
+      proposal = await testEnv.propose(proposer, proposal);
     });
     it('"voteSucceeded" should be false when for and against are the same', async () => {
       await testEnv.core.connect(alice).castVote(proposal.id, VoteType.for);

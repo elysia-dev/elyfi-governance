@@ -1,13 +1,12 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { expect } from 'chai';
-import { Contract, utils, Wallet } from 'ethers';
-import { waffle, ethers } from 'hardhat';
+import { utils, Wallet } from 'ethers';
+import { waffle } from 'hardhat';
+
 import { TestEnv } from './fixture/testEnv';
+
 import { ProposalState, VoteType } from './utils/enum';
 import { Proposal } from './utils/proposal';
-
-import { buildBallotData, buildDelegationData, getSignatureFromTypedData } from './utils/signature';
-import { MAX_UINT_AMOUNT } from './utils/math';
 import { advanceBlockToProposalEnd, getTimestamp } from './utils/time';
 import { formatBytesString } from './utils/bytes';
 

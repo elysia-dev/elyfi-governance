@@ -8,6 +8,7 @@ lerna-debug.log*
 
 # Coverage directory used by tools like istanbul
 coverage
+coverage.json
 *.lcov
 
 # node-waf configuration

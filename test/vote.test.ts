@@ -1,11 +1,12 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { expect } from 'chai';
-import { Contract, Wallet } from 'ethers';
-import { waffle, ethers } from 'hardhat';
+import { Wallet } from 'ethers';
+import { waffle } from 'hardhat';
+
 import { TestEnv } from './fixture/testEnv';
+
 import { VoteType } from './utils/enum';
 import { Proposal } from './utils/proposal';
-
 import { buildBallotData, buildDelegationData, getSignatureFromTypedData } from './utils/signature';
 import { MAX_UINT_AMOUNT } from './utils/math';
 
@@ -78,7 +79,7 @@ describe('vote', () => {
       });
 
       it('reverts if vote type is invalid', async () => {
-        await expect(testEnv.core.connect(bob).castVote(proposal.id, 3)).to.be.revertedWith(
+        await expect(testEnv.core.connect(alice).castVote(proposal.id, 3)).to.be.revertedWith(
           'ElyfiGovernor: invalid VoteType'
         );
       });

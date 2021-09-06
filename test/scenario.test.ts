@@ -1,20 +1,15 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { expect } from 'chai';
-import { Contract, Wallet } from 'ethers';
-import { waffle, ethers } from 'hardhat';
+import { Wallet } from 'ethers';
+import { waffle } from 'hardhat';
+
 import { TestEnv } from './fixture/testEnv';
+import { Elyfi } from './fixture/elyfi';
+
 import { AssetBondState, ProposalState, VoteType } from './utils/enum';
 import { Proposal } from './utils/proposal';
-
-import { Elyfi } from './fixture/elyfi';
 import { ElyfiAssetBond } from './utils/assetBond';
-import {
-  advanceBlock,
-  advanceBlockFromTo,
-  advanceBlockToProposalEnd,
-  advanceTimeToProposalEta,
-  getTimestamp,
-} from './utils/time';
+import { advanceBlockFromTo, advanceTimeToProposalEta } from './utils/time';
 
 const { loadFixture } = waffle;
 

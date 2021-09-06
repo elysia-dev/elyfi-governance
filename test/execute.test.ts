@@ -1,7 +1,9 @@
-import { loadFixture } from '@ethereum-waffle/provider';
 import { Wallet } from 'ethers';
-import { waffle, ethers } from 'hardhat';
+import { waffle } from 'hardhat';
+
 import { TestEnv } from './fixture/testEnv';
+
+const { loadFixture } = waffle;
 
 describe('execute', () => {
   let admin: Wallet;

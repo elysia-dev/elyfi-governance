@@ -1,9 +1,11 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { expect } from 'chai';
 import { Wallet } from 'ethers';
-import { waffle, ethers } from 'hardhat';
+import { waffle } from 'hardhat';
+
 import { TestEnv } from './fixture/testEnv';
-import { ProposalState, VoteType } from './utils/enum';
+
+import { ProposalState } from './utils/enum';
 import { Proposal } from './utils/proposal';
 
 const { loadFixture } = waffle;

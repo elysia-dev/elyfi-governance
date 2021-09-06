@@ -1,8 +1,10 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { expect } from 'chai';
-import { Contract, Wallet, utils } from 'ethers';
-import { waffle, ethers } from 'hardhat';
+import { Wallet } from 'ethers';
+import { waffle } from 'hardhat';
+
 import { TestEnv } from './fixture/testEnv';
+
 import { VoteType } from './utils/enum';
 import { Proposal } from './utils/proposal';
 
