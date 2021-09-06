@@ -14,14 +14,13 @@ describe('policy', () => {
   let alice: Wallet;
   let bob: Wallet;
   let carol: Wallet;
-  let proposal: Proposal;
   let testEnv: TestEnv;
   let chainId: number;
 
   async function fixture() {
     const testEnv = await TestEnv.setup(admin, false);
     await testEnv.setProposers([proposer]);
-    await testEnv.setStakers([alice, bob, carol]);
+    await testEnv.setVoters([alice, bob, carol]);
     return testEnv;
   }
 
@@ -55,11 +54,6 @@ describe('policy', () => {
       expect(await testEnv.executor.token()).to.be.equal(testEnv.stakedElyfiToken.address);
       expect(await testEnv.executor.minVotingPower()).to.be.equal(utils.parseUnits('10000', 18));
       expect(await testEnv.executor.quorumNumerator()).to.be.equal(20);
-
-      expect(await testEnv.core.timelock()).to.be.equal(testEnv.executor.address);
-      expect(await testEnv.core.votingDelay()).to.be.equal(1); // In the mock core contract
-      expect(await testEnv.core.votingPeriod()).to.be.equal(10); // In the mock core contract
-      expect(await testEnv.core.quorum(0)).to.be.equal(0);
     });
   });
 
@@ -71,6 +65,50 @@ describe('policy', () => {
       await expect(
         testEnv.executor.connect(alice).updateMinVotingPower(utils.parseUnits('20000', 18))
       ).to.be.revertedWith('Only Policy Admin');
+    });
+
+    it('revert if new min voting power exceeds totalSuppy of the staked token', async () => {
+      await expect(
+        testEnv.executor.connect(admin).updateMinVotingPower(utils.parseUnits('100000', 18))
+      ).to.be.revertedWith('VotingPower over TotalSupply');
+    });
+
+    it('revert if new quorumNumerator is over quorumDenominator', async () => {
+      await expect(testEnv.executor.connect(admin).updateQuorumNumerator(200)).to.be.revertedWith(
+        'QuorumNumerator over QuorumDenominator'
+      );
+    });
+
+    it('admin can update quorum numerator and min voting power', async () => {
+      await expect(
+        testEnv.executor.connect(admin).updateMinVotingPower(utils.parseUnits('20000', 18))
+      )
+        .to.be.emit(testEnv.executor, 'MinVotingPowerUpdated')
+        .withArgs(utils.parseUnits('10000', 18), utils.parseUnits('20000', 18));
+      await expect(testEnv.executor.connect(admin).updateQuorumNumerator(40))
+        .to.be.emit(testEnv.executor, 'QuorumNumeratorUpdated')
+        .withArgs(20, 40);
+    });
+  });
+
+  context('vote success', async () => {
+    let proposal: Proposal;
+    beforeEach('set', async () => {
+      const targets = [testEnv.executor.address];
+      const values = [BigNumber.from(0)];
+      const calldatas = [
+        testEnv.executor.interface.encodeFunctionData('grantRole', [
+          await testEnv.executor.LENDING_COMPANY_ROLE(),
+          carol.address,
+        ]),
+      ];
+      proposal = await Proposal.createProposal(targets, values, calldatas, 'description');
+    });
+    it('"voteSucceeded" should be false when for and against are the same', async () => {
+      await testEnv.core.connect(alice).castVote(proposal.id, VoteType.for);
+      await testEnv.core.connect(bob).castVote(proposal.id, VoteType.against);
+      const proposalVote = await testEnv.core.proposalVotes(proposal.id);
+      expect(await testEnv.executor.voteSucceeded(proposalVote)).to.be.false;
     });
 
     it('revert if new min voting power exceeds totalSuppy of the staked token', async () => {

@@ -33,6 +33,7 @@ describe('core', () => {
       expect(await testEnv.core.votingDelay()).to.be.equal(1); // In the mock core contract
       expect(await testEnv.core.votingPeriod()).to.be.equal(10); // In the mock core contract
       expect(await testEnv.core.quorum(0)).to.be.equal(0);
+      expect(await testEnv.core.COUNTING_MODE()).to.be.equal('support=bravo&quorum=for,abstain');
     });
   });
 });

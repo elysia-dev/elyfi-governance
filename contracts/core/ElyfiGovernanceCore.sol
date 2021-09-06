@@ -104,7 +104,7 @@ contract ElyfiGovernanceCore is Governor, GovernorTimelockControl {
     } else if (support == uint8(DataStruct.VoteType.Abstain)) {
       proposalvote.abstainVotes += weight;
     } else {
-      revert('ElyfiGovernor: invalid value for enum DataStruct.VoteType');
+      revert('ElyfiGovernor: invalid VoteType');
     }
   }
 

@@ -76,6 +76,12 @@ describe('vote', () => {
           testEnv.core.connect(bob).castVote(proposal.id, VoteType.for)
         ).to.be.revertedWith('ElyfiGovernor: Invalid Voter');
       });
+
+      it('reverts if vote type is invalid', async () => {
+        await expect(testEnv.core.connect(bob).castVote(proposal.id, 3)).to.be.revertedWith(
+          'ElyfiGovernor: invalid VoteType'
+        );
+      });
     });
   });
 
