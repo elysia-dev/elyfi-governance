@@ -74,6 +74,9 @@ workspace.code-workspace
 # Deployement files
 deployments/
 
+# Dependency files
+dependencies/
+
 # xml, xlsx file
 *.xlsx
 *.xml
