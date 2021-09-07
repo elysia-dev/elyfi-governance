@@ -1,7 +1,4 @@
-import { Bytes } from '@ethersproject/bytes';
-import { ethers } from 'hardhat';
-import { BigNumber, Wallet } from 'ethers';
-import { ProposalState } from './enum';
+import { BigNumber, utils, Wallet } from 'ethers';
 import { toRate } from './math';
 import { toTimestamp } from './time';
 
@@ -54,8 +51,8 @@ export class ElyfiAssetBond {
       ),
       borrower,
       signer,
-      ethers.utils.parseEther('500000'),
-      ethers.utils.parseEther('2500000000'),
+      utils.parseEther('500000'),
+      utils.parseEther('2500000000'),
       toRate(0.1),
       toRate(0.03),
       BigNumber.from(365),

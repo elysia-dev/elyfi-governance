@@ -1,4 +1,3 @@
-import '@nomiclabs/hardhat-waffle';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 export async function isDeployed(deployments: any, name: string): Promise<boolean> {
