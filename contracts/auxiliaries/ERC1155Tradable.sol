@@ -6,13 +6,15 @@ import '@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol';
 import '@openzeppelin/contracts/access/AccessControl.sol';
 import '@openzeppelin/contracts/utils/Strings.sol';
 
+import '../interfaces/IERC1155Tradable.sol';
+
 contract OwnableDelegateProxy {}
 
 contract ProxyRegistry {
   mapping(address => OwnableDelegateProxy) public proxies;
 }
 
-contract ERC1155Tradable is ERC1155Supply, AccessControl {
+contract ERC1155Tradable is IERC1155Tradable, ERC1155Supply, AccessControl {
   using Strings for uint256;
 
   bytes32 public constant MINTER_ROLE = keccak256('MINTER_ROLE');
@@ -69,17 +71,8 @@ contract ERC1155Tradable is ERC1155Supply, AccessControl {
     uint256 id,
     uint256 amount,
     bytes memory data
-  ) public onlyRole(MINTER_ROLE) {
+  ) public override onlyRole(MINTER_ROLE) {
     _mint(account, id, amount, data);
-  }
-
-  function mintBatch(
-    address to,
-    uint256[] memory ids,
-    uint256[] memory amounts,
-    bytes memory data
-  ) public onlyRole(MINTER_ROLE) {
-    _mintBatch(to, ids, amounts, data);
   }
 
   /**

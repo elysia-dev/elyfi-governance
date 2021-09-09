@@ -3,17 +3,16 @@ pragma solidity 0.8.4;
 
 import '../core/ElyfiGovernanceCore.sol';
 
-import '@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol';
-
 contract ElyfiGovernanceCoreTest is ElyfiGovernanceCore {
   uint256 immutable _votingDelay;
   uint256 immutable _votingPeriod;
 
   constructor(
-    TimelockController _timelock,
+    TimelockController timelock,
+    IERC1155Tradable rewardBadge,
     uint256 votingDelay_,
     uint256 votingPeriod_
-  ) ElyfiGovernanceCore(_timelock) {
+  ) ElyfiGovernanceCore(timelock, rewardBadge) {
     _votingDelay = votingDelay_;
     _votingPeriod = votingPeriod_;
   }

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.4;
 
-import '../interfaces/IElyfiGovernanceCore.sol';
 import '../interfaces/IPolicy.sol';
 
 import '@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol';

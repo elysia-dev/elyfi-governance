@@ -2,21 +2,21 @@
 pragma solidity 0.8.4;
 
 import '@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol';
-
 import '../interfaces/IPolicy.sol';
+import '../interfaces/IERC1155Tradable.sol';
 import '../libraries/DataStruct.sol';
 
-import 'hardhat/console.sol';
-
 contract ElyfiGovernanceCore is Governor, GovernorTimelockControl {
-  constructor(TimelockController _timelock)
+  constructor(TimelockController timelock, IERC1155Tradable rewardBadge)
     Governor('ElyfiGovernanceCore')
-    GovernorTimelockControl(_timelock)
+    GovernorTimelockControl(timelock)
   {
-    _policy = IPolicy(address(_timelock));
+    _policy = IPolicy(address(timelock));
+    _rewardBadge = rewardBadge;
   }
 
   IPolicy private _policy;
+  IERC1155Tradable private _rewardBadge;
 
   mapping(uint256 => DataStruct.ProposalVote) private _proposalVotes;
 
@@ -91,6 +91,8 @@ contract ElyfiGovernanceCore is Governor, GovernorTimelockControl {
       _policy.validateVoter(account, proposalSnapshot(proposalId)),
       'ElyfiGovernor: Invalid Voter'
     );
+
+    _rewardBadge.mint(account, proposalId, 1, '');
 
     DataStruct.ProposalVote storage proposalvote = _proposalVotes[proposalId];
 
