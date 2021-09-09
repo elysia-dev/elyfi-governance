@@ -2,7 +2,6 @@ import { Contract } from '@ethersproject/contracts';
 
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { DeployFunction } from 'hardhat-deploy/types';
-import { getToken } from '../utils/deployments';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   let stakedElyfiToken: Contract;

@@ -82,11 +82,11 @@ export class TestEnv {
 
   public async propose(proposer: Wallet, proposal: Proposal): Promise<Proposal> {
     const createdProposal = { ...proposal } as Proposal;
-    const proposalTx = await this.core
+    const proposeTx = await this.core
       .connect(proposer)
       .propose(proposal.targets, proposal.values, proposal.callDatas, proposal.description);
 
-    const events = (await proposalTx.wait()).events as Array<Event>;
+    const events = (await proposeTx.wait()).events as Array<Event>;
     const result = events[0].args as Result;
 
     createdProposal.id = result['proposalId'];

@@ -1,6 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { expect } from 'chai';
-import { Wallet } from 'ethers';
+import { ethers, Wallet } from 'ethers';
 import { waffle } from 'hardhat';
 
 import { TestEnv } from './fixture/testEnv';
@@ -8,7 +8,6 @@ import { TestEnv } from './fixture/testEnv';
 import { VoteType } from './utils/enum';
 import { Proposal } from './utils/proposal';
 import { buildBallotData, buildDelegationData, getSignatureFromTypedData } from './utils/signature';
-import { MAX_UINT_AMOUNT } from './utils/math';
 
 const { loadFixture } = waffle;
 
@@ -96,7 +95,7 @@ describe('vote', () => {
         testEnv.stakedElyfiToken.address,
         alice.address,
         nonce,
-        MAX_UINT_AMOUNT
+        ethers.constants.MaxUint256.toString()
       );
 
       const signature = getSignatureFromTypedData(alice.privateKey, data);
@@ -104,7 +103,7 @@ describe('vote', () => {
       await testEnv.stakedElyfiToken.delegateBySig(
         alice.address,
         nonce,
-        MAX_UINT_AMOUNT,
+        ethers.constants.MaxUint256.toString(),
         signature.v,
         signature.r,
         signature.s
