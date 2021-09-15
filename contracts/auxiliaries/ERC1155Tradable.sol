@@ -20,9 +20,7 @@ contract ERC1155Tradable is IERC1155Tradable, ERC1155Supply, AccessControl {
   bytes32 public constant MINTER_ROLE = keccak256('MINTER_ROLE');
 
   address public proxyRegistryAddress;
-  // Contract name
   string public name;
-  // Contract symbol
   string public symbol;
 
   constructor(

@@ -11,6 +11,8 @@ contract Executor is TimelockController, Policy {
   /// @param proposers Governance core address
   /// @param executors Executors address
   /// @param token_ The address of the token representing voting rights
+  /// @param minVotingPower Minimum voting power requirement
+  /// @param quorumNumerator_ The quorum numerator
   constructor(
     uint256 minDelay,
     address[] memory proposers,

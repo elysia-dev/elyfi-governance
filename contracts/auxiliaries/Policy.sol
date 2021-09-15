@@ -39,7 +39,7 @@ contract Policy is IPolicy, AccessControl {
 
   ///////// Main Interfaces
 
-  /// @notice Check whether proposer can create the proposal at the end of the blockNumber
+  /// @notice Check whether the account can create the proposal at the end of the blockNumber
   /// @dev Proposer must be authorized in this version
   /// @param account The proposer address
   /// @param blockNumber The past blocknumber
@@ -54,7 +54,7 @@ contract Policy is IPolicy, AccessControl {
     return _validateProposer(account);
   }
 
-  /// @notice Check whether voter can vote on the proposal at the end of the blockNumber
+  /// @notice Check whether the account can vote on the proposal at the end of the blockNumber
   /// @dev Voting power should be over the
   /// @param account The voter address
   /// @param blockNumber The past blocknumber
@@ -155,7 +155,7 @@ contract Policy is IPolicy, AccessControl {
   }
 
   function _updateMinVotingPower(uint256 newMinVotingPower) internal {
-    require(newMinVotingPower <= token.totalSupply(), 'VotingPower over TotalSupply');
+    require(newMinVotingPower <= token.totalSupply(), 'VotingPower exceeds TotalSupply');
 
     uint256 oldMinVotingPower = _minVotingPower;
     _minVotingPower = newMinVotingPower;
