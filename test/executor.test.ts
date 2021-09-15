@@ -21,7 +21,7 @@ describe('executor', () => {
   let chainId: number;
 
   async function fixture() {
-    const testEnv = await TestEnv.setup(admin, false);
+    const testEnv = await TestEnv.setup(admin);
     await testEnv.setProposers([proposer]);
     await testEnv.setStakers([alice, bob, carol]);
     return testEnv;
@@ -65,9 +65,5 @@ describe('executor', () => {
       ).to.be.true;
       expect(await testEnv.executor.getMinDelay()).to.be.equal(6400);
     });
-  });
-
-  context('', async () => {
-    it('', async () => {});
   });
 });

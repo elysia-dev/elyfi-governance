@@ -1,4 +1,4 @@
-import { ElyfiGovernanceCoreTest, Executor } from '../../typechain';
+import { ElyfiGovernanceCoreTest, Executor, RewardBadge } from '../../typechain';
 
 import { ERC20Test } from '@elysia-dev/contract-typechain';
 
@@ -8,6 +8,7 @@ import { Proposal } from '../utils/proposal';
 
 import ElyfiGovernanceCoreTestArtifact from '../../artifacts/contracts/test/ElyfiGovernanceCoreTest.sol/ElyfiGovernanceCoreTest.json';
 import ExecutorArtifact from '../../artifacts/contracts/core/Executor.sol/Executor.json';
+import RewardBadgeArtifact from '../../artifacts/contracts/auxiliaries/RewardBadge.sol/RewardBadge.json';
 
 import StakingPoolV2Artifact from '@elysia-dev/contract-artifacts/artifacts/contracts/StakingPoolV2.sol/StakingPoolV2.json';
 import ERC20Artifact from '@elysia-dev/contract-artifacts/artifacts/contracts/test/ERC20Test.sol/ERC20Test.json';
@@ -28,7 +29,7 @@ export class TestEnv {
   executor: Executor;
   elyfiToken: ERC20Test;
   stakedElyfiToken: Contract;
-  elyfi: Elyfi | undefined;
+  rewardBadge: RewardBadge;
 
   constructor(
     admin: Wallet,
@@ -36,14 +37,14 @@ export class TestEnv {
     executor: Executor,
     elyfiToken: ERC20Test,
     stakedElyfiToken: Contract,
-    elyfi: Elyfi | undefined
+    rewardBadge: RewardBadge
   ) {
     this.admin = admin;
     this.core = core;
     this.executor = executor;
     this.elyfiToken = elyfiToken;
     this.stakedElyfiToken = stakedElyfiToken;
-    this.elyfi = elyfi;
+    this.rewardBadge = rewardBadge;
   }
 
   public async setVoters(accounts: Wallet[]) {
@@ -127,8 +128,8 @@ export class TestEnv {
     );
   }
 
-  public static async setup(admin: Wallet, setupElyfi?: Boolean) {
-    let elyfi: Elyfi | undefined;
+  public static async setup(admin: Wallet) {
+    const rewardBadge = (await waffle.deployContract(admin, RewardBadgeArtifact)) as RewardBadge;
 
     const elyfiToken = (await waffle.deployContract(admin, ERC20Artifact, [
       utils.parseUnits('1', 36),
@@ -158,6 +159,7 @@ export class TestEnv {
 
     const core = (await waffle.deployContract(admin, ElyfiGovernanceCoreTestArtifact, [
       executor.address,
+      rewardBadge.address,
       1,
       10,
     ])) as ElyfiGovernanceCoreTest;
@@ -178,10 +180,6 @@ export class TestEnv {
 
     await advanceTimeTo(await getTimestamp(initTx), startTimestamp);
 
-    elyfi = undefined;
-    if (setupElyfi) {
-      elyfi = await Elyfi.setup(admin);
-    }
-    return new TestEnv(admin, core, executor, elyfiToken, stakedElyfiToken, elyfi);
+    return new TestEnv(admin, core, executor, elyfiToken, stakedElyfiToken, rewardBadge);
   }
 }

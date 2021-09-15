@@ -22,7 +22,7 @@ describe('vote', () => {
   let chainId: number;
 
   async function fixture() {
-    const testEnv = await TestEnv.setup(admin, false);
+    const testEnv = await TestEnv.setup(admin);
     await testEnv.setProposers([proposer]);
     await testEnv.setStakers([alice, bob]);
     return testEnv;

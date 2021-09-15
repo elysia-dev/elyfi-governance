@@ -23,7 +23,7 @@ describe('queue', () => {
   let chainId: number;
 
   async function fixture() {
-    const testEnv = await TestEnv.setup(admin, false);
+    const testEnv = await TestEnv.setup(admin);
     await testEnv.setProposers([proposer]);
     await testEnv.setVoters([alice, bob, carol]);
     return testEnv;
@@ -53,9 +53,14 @@ describe('queue', () => {
 
   context('queue', async () => {
     it('reverts if queue not existing proposal', async () => {
-      await expect(testEnv.core.castVote(BigNumber.from(1234), VoteType.for)).to.be.revertedWith(
-        'Governor: unknown proposal id'
+      const descriptionHash = utils.keccak256(formatBytesString(proposal.description));
+      const tx = await testEnv.core.queue(
+        proposal.targets,
+        proposal.values,
+        proposal.callDatas,
+        descriptionHash
       );
+      expect(tx).to.be.revertedWith('Governor: proposal not successful');
     });
 
     context('proposal created', async () => {
