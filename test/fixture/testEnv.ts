@@ -165,6 +165,7 @@ export class TestEnv {
     ])) as ElyfiGovernanceCoreTest;
 
     await executor.init(core.address);
+    await rewardBadge.grantRole(await rewardBadge.MINTER_ROLE(), core.address);
 
     const rewardPersecond = BigNumber.from(utils.parseEther('1'));
     const year = BigNumber.from(2022);
