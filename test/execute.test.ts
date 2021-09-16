@@ -13,11 +13,7 @@ import { formatBytesString } from './utils/bytes';
 const { loadFixture } = waffle;
 
 describe('execute', () => {
-  let admin: Wallet;
-  let proposer: Wallet;
-  let alice: Wallet;
-  let bob: Wallet;
-  let carol: Wallet;
+  let [admin, proposer, alice, bob, carol]: Wallet[] = [];
   let proposal: Proposal;
   let testEnv: TestEnv;
   let chainId: number;
@@ -59,15 +55,15 @@ describe('execute', () => {
     });
 
     describe('', async () => {
-      it('success', async () => {});
-      it('reverts if execute canceled proposal', async () => {});
-      it('reverts if execute expired proposal', async () => {});
-      it('reverts if execute queued proposal before timelock', async () => {});
+      it('success', async () => { });
+      it('reverts if execute canceled proposal', async () => { });
+      it('reverts if execute expired proposal', async () => { });
+      it('reverts if execute queued proposal before timelock', async () => { });
     });
 
     describe('cancel', async () => {
-      it('reverts if cancel canceled proposal', async () => {});
-      it('reverts if normal account cancel proposal', async () => {});
+      it('reverts if cancel canceled proposal', async () => { });
+      it('reverts if normal account cancel proposal', async () => { });
     });
 
     context('proposal created', async () => {

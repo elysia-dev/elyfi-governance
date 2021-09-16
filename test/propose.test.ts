@@ -11,9 +11,7 @@ import { Proposal } from './utils/proposal';
 const { loadFixture } = waffle;
 
 describe('propose', () => {
-  let admin: Wallet;
-  let proposer: Wallet;
-  let voter: Wallet;
+  let [admin, proposer, voter]: Wallet[] = [];
   let testEnv: TestEnv;
   let proposal: Proposal;
 

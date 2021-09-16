@@ -11,11 +11,7 @@ import { advanceBlockFromTo, advanceTimeToProposalEta } from './utils/time';
 const { loadFixture } = waffle;
 
 describe('state', () => {
-  let admin: Wallet;
-  let proposer: Wallet;
-  let alice: Wallet;
-  let bob: Wallet;
-  let carol: Wallet;
+  let [admin, proposer, alice, bob, carol]: Wallet[] = [];
   let proposal: Proposal;
   let testEnv: TestEnv;
   let chainId: number;

@@ -11,11 +11,7 @@ import { Proposal } from './utils/proposal';
 const { loadFixture } = waffle;
 
 describe('policy', () => {
-  let admin: Wallet;
-  let proposer: Wallet;
-  let alice: Wallet;
-  let bob: Wallet;
-  let carol: Wallet;
+  let [admin, proposer, alice, bob, carol]: Wallet[] = [];
   let testEnv: TestEnv;
   let chainId: number;
 

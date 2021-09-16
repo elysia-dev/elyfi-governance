@@ -13,11 +13,7 @@ import { formatBytesString } from './utils/bytes';
 const { loadFixture } = waffle;
 
 describe('queue', () => {
-  let admin: Wallet;
-  let proposer: Wallet;
-  let alice: Wallet;
-  let bob: Wallet;
-  let carol: Wallet;
+  let [admin, proposer, alice, bob, carol]: Wallet[] = [];
   let proposal: Proposal;
   let testEnv: TestEnv;
   let chainId: number;

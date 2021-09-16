@@ -7,9 +7,7 @@ import { TestEnv } from './fixture/testEnv';
 const { loadFixture } = waffle;
 
 describe('core', () => {
-  let admin: Wallet;
-  let proposer: Wallet;
-  let voter: Wallet;
+  let [admin, proposer, voter]: Wallet[] = [];
   let testEnv: TestEnv;
 
   async function fixture() {
