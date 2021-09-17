@@ -113,7 +113,7 @@ describe('policy', () => {
     it('revert if new min voting power exceeds totalSuppy of the staked token', async () => {
       await expect(
         testEnv.executor.connect(admin).updateMinVotingPower(utils.parseUnits('100000', 18))
-      ).to.be.revertedWith('VotingPower over TotalSupply');
+      ).to.be.revertedWith('VotingPower exceeds TotalSupply');
     });
 
     it('revert if new quorumNumerator is over quorumDenominator', async () => {

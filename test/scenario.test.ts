@@ -22,10 +22,11 @@ describe('scenario', () => {
   let elyfi: Elyfi;
 
   async function fixture() {
-    const testEnv = await TestEnv.setup(admin, true);
+    const testEnv = await TestEnv.setup(admin);
     await testEnv.setProposers([proposer]);
     await testEnv.setVoters([voter]);
-    return testEnv;
+    const elyfi = await Elyfi.setup(admin);
+    return { testEnv, elyfi };
   }
 
   before(async () => {
@@ -33,8 +34,9 @@ describe('scenario', () => {
   });
 
   beforeEach(async () => {
-    testEnv = await loadFixture(fixture);
-    elyfi = testEnv.elyfi as Elyfi;
+    const env = await loadFixture(fixture);
+    elyfi = env.elyfi as Elyfi;
+    testEnv = env.testEnv as TestEnv;
   });
 
   after(async () => {

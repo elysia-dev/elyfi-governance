@@ -33,13 +33,14 @@ describe('queue', () => {
   beforeEach(async () => {
     testEnv = await loadFixture(fixture);
 
-    const proposalId = BigNumber.from('1234');
-    const targets = [testEnv.core.address];
+    const targets = [testEnv.executor.address];
     const values = [BigNumber.from(0)];
     const calldatas = [
-      testEnv.core.interface.encodeFunctionData('castVote', [proposalId, VoteType.for]),
+      testEnv.executor.interface.encodeFunctionData('grantRole', [
+        await testEnv.executor.LENDING_COMPANY_ROLE(),
+        carol.address,
+      ]),
     ];
-
     proposal = await Proposal.createProposal(targets, values, calldatas, 'description');
   });
 
@@ -50,13 +51,9 @@ describe('queue', () => {
   context('queue', async () => {
     it('reverts if queue not existing proposal', async () => {
       const descriptionHash = utils.keccak256(formatBytesString(proposal.description));
-      const tx = await testEnv.core.queue(
-        proposal.targets,
-        proposal.values,
-        proposal.callDatas,
-        descriptionHash
-      );
-      expect(tx).to.be.revertedWith('Governor: proposal not successful');
+      await expect(
+        testEnv.core.queue(proposal.targets, proposal.values, proposal.callDatas, descriptionHash)
+      ).to.be.revertedWith('Governor: unknown proposal id');
     });
 
     context('proposal created', async () => {
