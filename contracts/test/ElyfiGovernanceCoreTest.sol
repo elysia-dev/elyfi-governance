@@ -9,10 +9,9 @@ contract ElyfiGovernanceCoreTest is ElyfiGovernanceCore {
 
   constructor(
     TimelockController timelock,
-    IERC1155Tradable rewardBadge,
     uint256 votingDelay_,
     uint256 votingPeriod_
-  ) ElyfiGovernanceCore(timelock, rewardBadge) {
+  ) ElyfiGovernanceCore(timelock) {
     _votingDelay = votingDelay_;
     _votingPeriod = votingPeriod_;
   }

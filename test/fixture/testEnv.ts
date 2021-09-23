@@ -2,19 +2,17 @@ import { ElyfiGovernanceCoreTest, Executor, RewardBadge } from '../../typechain'
 
 import { ERC20Test } from '@elysia-dev/contract-typechain';
 
-import { Elyfi } from './elyfi';
 import { waffle } from 'hardhat';
 import { Proposal } from '../utils/proposal';
 
 import ElyfiGovernanceCoreTestArtifact from '../../artifacts/contracts/test/ElyfiGovernanceCoreTest.sol/ElyfiGovernanceCoreTest.json';
 import ExecutorArtifact from '../../artifacts/contracts/core/Executor.sol/Executor.json';
-import RewardBadgeArtifact from '../../artifacts/contracts/auxiliaries/RewardBadge.sol/RewardBadge.json';
 
 import StakingPoolV2Artifact from '@elysia-dev/contract-artifacts/artifacts/contracts/StakingPoolV2.sol/StakingPoolV2.json';
 import ERC20Artifact from '@elysia-dev/contract-artifacts/artifacts/contracts/test/ERC20Test.sol/ERC20Test.json';
 
 import { BigNumber, Contract, utils, Wallet } from 'ethers';
-import { ProposalState, VoteType } from '../utils/enum';
+import { ProposalState } from '../utils/enum';
 
 import { Event } from '@ethersproject/contracts';
 import { expect } from 'chai';
@@ -29,22 +27,19 @@ export class TestEnv {
   executor: Executor;
   elyfiToken: ERC20Test;
   stakedElyfiToken: Contract;
-  rewardBadge: RewardBadge;
 
   constructor(
     admin: Wallet,
     core: ElyfiGovernanceCoreTest,
     executor: Executor,
     elyfiToken: ERC20Test,
-    stakedElyfiToken: Contract,
-    rewardBadge: RewardBadge
+    stakedElyfiToken: Contract
   ) {
     this.admin = admin;
     this.core = core;
     this.executor = executor;
     this.elyfiToken = elyfiToken;
     this.stakedElyfiToken = stakedElyfiToken;
-    this.rewardBadge = rewardBadge;
   }
 
   public async setVoters(accounts: Wallet[]) {
@@ -129,8 +124,6 @@ export class TestEnv {
   }
 
   public static async setup(admin: Wallet) {
-    const rewardBadge = (await waffle.deployContract(admin, RewardBadgeArtifact)) as RewardBadge;
-
     const elyfiToken = (await waffle.deployContract(admin, ERC20Artifact, [
       utils.parseUnits('1', 36),
       'name',
@@ -159,13 +152,11 @@ export class TestEnv {
 
     const core = (await waffle.deployContract(admin, ElyfiGovernanceCoreTestArtifact, [
       executor.address,
-      rewardBadge.address,
       1,
       10,
     ])) as ElyfiGovernanceCoreTest;
 
     await executor.init(core.address);
-    await rewardBadge.grantRole(await rewardBadge.MINTER_ROLE(), core.address);
 
     const rewardPersecond = BigNumber.from(utils.parseEther('1'));
     const year = BigNumber.from(2022);
@@ -181,6 +172,6 @@ export class TestEnv {
 
     await advanceTimeTo(await getTimestamp(initTx), startTimestamp);
 
-    return new TestEnv(admin, core, executor, elyfiToken, stakedElyfiToken, rewardBadge);
+    return new TestEnv(admin, core, executor, elyfiToken, stakedElyfiToken);
   }
 }
