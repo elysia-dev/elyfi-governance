@@ -1,12 +1,12 @@
 import { task } from 'hardhat/config';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { Connector, Tokenizer } from '@elysia-dev/contract-typechain';
-import { getContract } from '../utils/deployment';
-import { ElyfiGovernanceCore, Executor } from '../typechain';
+import { getContract } from '../../utils/deployment';
+import { ElyfiGovernanceCore, Executor } from '../../typechain';
 import { BigNumber, Contract, utils } from 'ethers';
-import { toRate } from '../test/utils/math';
-import { Proposal } from '../test/utils/proposal';
-import { SignerWithAddress } from 'hardhat-deploy-ethers/src/signers';
+import { toRate } from '../../test/utils/math';
+import { Proposal } from '../../test/utils/proposal';
 
 interface Args {
   nonce: string;
@@ -47,27 +47,6 @@ const checkLendingCompany = async ({
   }
 };
 
-const checkVoter = async ({
-  stakingPool,
-  executor,
-  txSender,
-  deployer,
-  blockNumber,
-}: {
-  stakingPool: Contract;
-  executor: Executor;
-  txSender: string;
-  deployer: SignerWithAddress;
-  blockNumber: BigNumber;
-}) => {
-  const isVoter = await executor.validateVoter(txSender, blockNumber);
-  if (!isVoter) {
-    const addVoterTx = await stakingPool.connect(deployer).addVoter(txSender);
-    await addVoterTx.wait();
-    console.log(`Deployer add a council role to ${txSender}`);
-  }
-};
-
 task('gov:propose:signAssetBond', 'propose')
   .addParam('nonce', 'The asset bond from saved data')
   .setAction(async (args: Args, hre: HardhatRuntimeEnvironment) => {
@@ -87,7 +66,6 @@ task('gov:propose:signAssetBond', 'propose')
       txSender: lendingCompany.address,
       deployer: deployer,
     });
-    await checkVoter({ connector: connector, txSender: executor.address, deployer: deployer });
 
     const targets = [executor.address];
     const values = [BigNumber.from(0)];

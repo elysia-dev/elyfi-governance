@@ -7,9 +7,7 @@ Set up .env file in the project directory and add the following environment vari
 ```
 # Secret key for deploying contracts
 ADMIN=
-
 INFURA_API_KEY=
-
 TEST_MNEMONIC=
 
 ```

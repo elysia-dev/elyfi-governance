@@ -2,10 +2,10 @@ import { task } from 'hardhat/config';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { Connector, Tokenizer } from '@elysia-dev/contract-typechain';
-import { getContract } from '../utils/deployment';
-import { Executor } from '../typechain';
+import { getContract } from '../../utils/deployment';
+import { Executor } from '../../typechain';
 import { BigNumber, utils } from 'ethers';
-import { toRate } from '../test/utils/math';
+import { toRate } from '../../test/utils/math';
 
 interface Args {
   nonce: string;

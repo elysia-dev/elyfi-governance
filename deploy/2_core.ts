@@ -2,6 +2,7 @@ import { Contract } from '@ethersproject/contracts';
 
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { DeployFunction } from 'hardhat-deploy/types';
+import { getContract } from '../utils/deployment';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   let stakedElyfiToken: Contract;
@@ -10,8 +11,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deploy, get, read, execute, getOrNull, log } = deployments;
   const { deployer } = await getNamedAccounts();
 
-  stakedElyfiToken = await getToken();
-
+  const badge = await getContract(hre, 'RewardBadge');
   const executor = await get('Executor');
 
   const args = {
@@ -27,11 +27,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 
   if (core.newlyDeployed) {
-    await execute('Executor', { from: deployer, log: true }, 'init', core.address);
+    await execute('Executor', { from: deployer, log: true }, 'init', [core.address]);
+    await execute('RewardBadge', { from: deployer, log: true }, 'grantRole', [
+      await badge.MINTER_ROLE(),
+      core.address,
+    ]);
   }
 };
 
 export default func;
 
 func.tags = ['core'];
-func.dependencies = ['executor'];
+func.dependencies = ['badge', 'executor'];

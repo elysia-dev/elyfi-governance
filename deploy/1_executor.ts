@@ -2,16 +2,16 @@ import { Contract } from '@ethersproject/contracts';
 
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { DeployFunction } from 'hardhat-deploy/types';
-import { getToken } from '../utils/deployments';
+import { getContract } from '../utils/deployment';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   let stakedElyfiToken: Contract;
 
   const { deployments, getNamedAccounts } = hre;
-  const { deploy, get, read, execute, getOrNull, log } = deployments;
+  const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
 
-  stakedElyfiToken = await getToken();
+  stakedElyfiToken = await getContract(hre, 'StakingPoolV2');
 
   const args = {
     minDelay: 6400,

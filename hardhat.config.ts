@@ -9,7 +9,7 @@ import 'solidity-coverage';
 
 import { HardhatUserConfig } from 'hardhat/types';
 
-import './tasks/elyfi';
+import './tasks/test/elyfi';
 
 const config: HardhatUserConfig = {
   solidity: {

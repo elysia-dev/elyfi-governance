@@ -1,7 +1,6 @@
 {
   "scripts": {
     "coverage": "yarn hardhat coverage --testfiles 'test/contracts/**/*.test.ts' --solcoverjs ./.solcover.js"
-    
   },
   "name": "elyfi-governance",
   "version": "1.0.0",
