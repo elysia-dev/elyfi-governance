@@ -16,6 +16,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const args = {
     executor: executor.address,
+    badge: badge.address,
   };
 
   const core = await deploy('ElyfiGovernanceCore', {
@@ -26,13 +27,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
   });
 
+  await execute('Executor', { from: deployer, log: true }, 'init', core.address);
+  await execute('RewardBadge', { from: deployer, log: true }, 'grantRole', [
+    await badge.MINTER_ROLE(),
+    core.address,
+  ]);
   if (core.newlyDeployed) {
-    await execute('Executor', { from: deployer, log: true }, 'init', [core.address]);
-    await execute('RewardBadge', { from: deployer, log: true }, 'grantRole', [
-      await badge.MINTER_ROLE(),
-      core.address,
-    ]);
   }
+
+  await hre.run('etherscan-verify', {
+    network: hre.network.name,
+  });
 };
 
 export default func;

@@ -29,6 +29,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     args: Object.values(args),
     log: true,
   });
+
+  await hre.run('etherscan-verify', {
+    network: hre.network.name,
+  });
 };
 
 export default func;
