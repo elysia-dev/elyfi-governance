@@ -24,6 +24,8 @@ contract ElyfiGovernanceCore is Governor, GovernorTimelockControl {
 
   /**
    * @dev See {IGovernor-COUNTING_MODE}.
+   * support=bravo refers to the vote options 0 = For, 1 = Against, 2 = Abstain
+   * quourm=for,abstain means that both For and Abstain votes are counted towards quorum.
    */
   // solhint-disable-next-line func-name-mixedcase
   function COUNTING_MODE() public pure virtual override returns (string memory) {
@@ -32,6 +34,7 @@ contract ElyfiGovernanceCore is Governor, GovernorTimelockControl {
 
   /**
    * @dev See {IGovernor-hasVoted}.
+   * Returns weither account has cast a vote on proposalId.
    */
   function hasVoted(uint256 proposalId, address account)
     public
@@ -62,6 +65,7 @@ contract ElyfiGovernanceCore is Governor, GovernorTimelockControl {
 
   /**
    * @dev See {Governor-_quorumReached}.
+   * Amount of votes already cast passes the threshold limit.
    */
   function _quorumReached(uint256 proposalId) internal view virtual override returns (bool) {
     DataStruct.ProposalVote storage proposalvote = _proposalVotes[proposalId];
@@ -70,7 +74,9 @@ contract ElyfiGovernanceCore is Governor, GovernorTimelockControl {
   }
 
   /**
-   * @dev See {Governor-_voteSucceeded}. In this module, the forVotes must be scritly over the againstVotes.
+   * @dev See {Governor-_voteSucceeded}.
+   * In this module, the forVotes must be scritly over the againstVotes.
+   * Is the proposal successful or not.
    */
   function _voteSucceeded(uint256 proposalId) internal view virtual override returns (bool) {
     DataStruct.ProposalVote storage proposalvote = _proposalVotes[proposalId];
@@ -79,7 +85,9 @@ contract ElyfiGovernanceCore is Governor, GovernorTimelockControl {
   }
 
   /**
-   * @dev See {Governor-_countVote}. In this module, the support follows the `DataStruct.VoteType` enum (from Governor Bravo).
+   * @dev See {Governor-_countVote}.
+   * Register a vote with a given support and voting weight.
+   * In this module, the support follows the `DataStruct.VoteType` enum (from Governor Bravo).
    */
   function _countVote(
     uint256 proposalId,
@@ -110,10 +118,17 @@ contract ElyfiGovernanceCore is Governor, GovernorTimelockControl {
     }
   }
 
+  /**
+   * Delay (in number of blocks) since the proposal is submitted until voting power is fixed and voting starts.
+   * This can be used to enforce a delay after a proposal is published for users to buy tokens, or delegate their votes.
+   */
   function votingDelay() public view virtual override returns (uint256) {
     return 1; // 1 block
   }
 
+  /**
+   * Delay (in number of blocks) since the proposal starts until voting ends.
+   */
   function votingPeriod() public view virtual override returns (uint256) {
     return 45818; // 1 week
   }
@@ -124,6 +139,9 @@ contract ElyfiGovernanceCore is Governor, GovernorTimelockControl {
     return _policy.quorum(blockNumber);
   }
 
+  /**
+   * Voting power of an account at a specific blockNumber
+   */
   function getVotes(address account, uint256 blockNumber)
     public
     view
@@ -133,6 +151,9 @@ contract ElyfiGovernanceCore is Governor, GovernorTimelockControl {
     return _policy.getVotes(account, blockNumber);
   }
 
+  /**
+   * Current state of a proposal, following Compound’s convention
+   */
   function state(uint256 proposalId)
     public
     view
@@ -142,6 +163,9 @@ contract ElyfiGovernanceCore is Governor, GovernorTimelockControl {
     return super.state(proposalId);
   }
 
+  /**
+   * Create a new proposal
+   */
   function propose(
     address[] memory targets,
     uint256[] memory values,
@@ -152,6 +176,9 @@ contract ElyfiGovernanceCore is Governor, GovernorTimelockControl {
     return super.propose(targets, values, calldatas, description);
   }
 
+  /*
+   * Internal execution mechanism
+   */
   function _execute(
     uint256 proposalId,
     address[] memory targets,
@@ -162,6 +189,9 @@ contract ElyfiGovernanceCore is Governor, GovernorTimelockControl {
     super._execute(proposalId, targets, values, calldatas, descriptionHash);
   }
 
+  /*
+   * Cancel the timelocked proposal if it as already been queued.
+   */
   function _cancel(
     address[] memory targets,
     uint256[] memory values,
