@@ -121,8 +121,4 @@ describe('scenario', () => {
       );
     });
   });
-
-  context('Elyfi:TimelockController, updateDelay, propose:vote:queue:excute', async () => {
-    it('success');
-  });
 });

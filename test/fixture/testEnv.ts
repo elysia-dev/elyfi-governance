@@ -162,13 +162,13 @@ export class TestEnv {
     const year = BigNumber.from(2022);
     const month = BigNumber.from(7);
     const day = BigNumber.from(7);
-    const duration = BigNumber.from(30);
+    const duration = BigNumber.from(30).mul(86400);
 
     const startTimestamp = toTimestamp(year, month, day, BigNumber.from(10));
 
     const initTx = await stakedElyfiToken
       .connect(admin)
-      .initNewRound(rewardPersecond, year, month, day, duration);
+      .initNewRound(rewardPersecond, startTimestamp, duration);
 
     await advanceTimeTo(await getTimestamp(initTx), startTimestamp);
 

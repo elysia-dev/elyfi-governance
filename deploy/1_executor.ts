@@ -13,6 +13,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   stakedElyfiToken = await getContract(hre, 'StakingPoolV2');
 
+  if (stakedElyfiToken.address == undefined) {
+    throw new Error('Cannot find StakedElyfiToken');
+  }
+
   const args = {
     minDelay: 6400,
     proposers: [],
