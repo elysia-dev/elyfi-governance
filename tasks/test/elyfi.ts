@@ -1,7 +1,7 @@
 import { task } from 'hardhat/config';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { Connector, Tokenizer } from '@elysia-dev/contract-typechain';
+import { Connector, ERC20Test, StakingPool, Tokenizer } from '@elysia-dev/contract-typechain';
 import { getContract } from '../../utils/deployment';
 import { Executor } from '../../typechain';
 import { BigNumber, utils } from 'ethers';
@@ -22,9 +22,9 @@ const assetBond = {
   couponRate: toRate(0.1),
   delinquencyRate: toRate(0.03),
   loanDuration: BigNumber.from(365),
-  loanStartTimeYear: BigNumber.from(2030),
-  loanStartTimeMonth: BigNumber.from(7),
-  loanStartTimeDay: BigNumber.from(7),
+  loanStartTimeYear: BigNumber.from(2021),
+  loanStartTimeMonth: BigNumber.from(11),
+  loanStartTimeDay: BigNumber.from(2),
   ipfsHash: '',
 };
 
@@ -69,13 +69,11 @@ task('elyfi:mintAssetBond', 'mint asset bond')
   .setAction(async (args: Args, hre: HardhatRuntimeEnvironment) => {
     const [deployer, lendingCompany, borrower] = await hre.ethers.getSigners();
 
-    const tokenizer = (await getContract(hre, 'Tokenizer')) as Tokenizer;
+    const tokenizer = (await getContract(hre, 'Elyfi_USDT_Tokenzier')) as Tokenizer;
     const connector = (await getContract(hre, 'Connector')) as Connector;
     const executor = (await getContract(hre, 'Executor')) as Executor;
 
     const tokenId = assetBond.tokenId.sub(args.nonce);
-
-    console.log(tokenizer.address, connector.address);
 
     await checkCollateralServiceProvider({
       connector: connector,
@@ -91,12 +89,12 @@ task('elyfi:mintAssetBond', 'mint asset bond')
     console.log(`The lending company mints asset token`);
   });
 
-task('elyfi:settleAssetBond', 'mint asset bond')
+task('elyfi:settleAssetBond', 'settle asset bond')
   .addParam('nonce', 'The asset bond from saved data')
   .setAction(async (args: Args, hre: HardhatRuntimeEnvironment) => {
     const [deployer, lendingCompany, borrower] = await hre.ethers.getSigners();
 
-    const tokenizer = (await getContract(hre, 'Tokenizer')) as Tokenizer;
+    const tokenizer = (await getContract(hre, 'Elyfi_USDT_Tokenzier')) as Tokenizer;
     const connector = (await getContract(hre, 'Connector')) as Connector;
     const executor = (await getContract(hre, 'Executor')) as Executor;
 
@@ -127,7 +125,27 @@ task('elyfi:settleAssetBond', 'mint asset bond')
       );
     await settleTx.wait();
     console.log(
-      `The collateral service provider settled asset bond, loan start day is
-      ${assetBond.loanStartTimeMonth}/${assetBond.loanStartTimeDay}`
+      `The lending company settled asset bond, loan start day is ${assetBond.loanStartTimeMonth}/${assetBond.loanStartTimeDay}`
     );
   });
+
+task('elyfi:stakeElyfi', 'stake elyfi').setAction(
+  async (args: Args, hre: HardhatRuntimeEnvironment) => {
+    const [deployer, lendingCompany, borrower] = await hre.ethers.getSigners();
+
+    const elyfi = await getContract(hre, 'Elyfi');
+    const stakingPool = (await getContract(hre, 'StakingPoolV2')) as StakingPool;
+
+    const accounts = [deployer, lendingCompany, borrower];
+
+    for (let account of accounts) {
+      const faucetTx = await elyfi.connect(account).faucet();
+      await faucetTx.wait();
+      const balance = await elyfi.balanceOf(account.address);
+      const approveTx = await elyfi.connect(account).approve(stakingPool.address, balance);
+      await approveTx.wait();
+      const stakeTx = await stakingPool.connect(account).stake(balance);
+      await stakeTx.wait();
+    }
+  }
+);
