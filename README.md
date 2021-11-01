@@ -27,3 +27,11 @@ Compile and test the smart contracts:
 yarn hardhat test
 
 ```
+
+### Deploy
+
+Deploy script is below:
+
+```
+yarn hardhat deploy --network {network name}
+```

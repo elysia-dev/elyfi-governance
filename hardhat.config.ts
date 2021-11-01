@@ -71,6 +71,7 @@ const config: HardhatUserConfig = {
     ],
     deployments: {
       kovan: ['dependencies/kovan'],
+      ropsten: ['dependencies/ropsten'],
     },
   },
 };
