@@ -109,7 +109,7 @@ contract ElyfiGovernanceCore is Governor, GovernorTimelockControl {
   /// @notice Delay (in number of blocks) since the proposal starts until voting ends.
   /// @dev average blockTime = 13.2s, 86400 / 13.2 = 6545
   function votingPeriod() public view virtual override returns (uint256) {
-    return 6545; // 1 week
+    return 6545; // 1 day
   }
 
   /**** The following functions are overrides required by Solidity. *****/

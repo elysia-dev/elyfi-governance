@@ -134,7 +134,7 @@ task('elyfi:stakeElyfi', 'stake elyfi').setAction(
     const [deployer, lendingCompany, borrower] = await hre.ethers.getSigners();
 
     const elyfi = await getContract(hre, 'Elyfi');
-    const stakingPool = (await getContract(hre, 'StakingPoolV2')) as StakingPool;
+    const stakingPool = await getContract(hre, 'StakingPoolV2');
 
     const accounts = [deployer, lendingCompany, borrower];
 
@@ -146,6 +146,21 @@ task('elyfi:stakeElyfi', 'stake elyfi').setAction(
       await approveTx.wait();
       const stakeTx = await stakingPool.connect(account).stake(balance);
       await stakeTx.wait();
+    }
+  }
+);
+
+task('elyfi:delegate', 'delegate elyfi').setAction(
+  async (args: Args, hre: HardhatRuntimeEnvironment) => {
+    const [deployer, lendingCompany, borrower] = await hre.ethers.getSigners();
+
+    const stakingPool = await getContract(hre, 'StakingPoolV2');
+
+    const accounts = [deployer, lendingCompany, borrower];
+
+    for (let account of accounts) {
+      const delegateTx = await stakingPool.connect(account).delegate(account.address);
+      await delegateTx.wait();
     }
   }
 );
