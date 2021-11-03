@@ -1,4 +1,5 @@
-import { BigNumber } from 'ethers';
+import { BigNumber, Bytes, utils } from 'ethers';
+import { formatBytesString } from './bytes';
 import { ProposalState } from './enum';
 
 export class Proposal {
@@ -6,12 +7,13 @@ export class Proposal {
   values: BigNumber[];
   callDatas: string[];
   description: string;
+  descriptionHash: string;
   id: BigNumber;
   state: ProposalState;
   startBlock: BigNumber;
   endBlock: BigNumber;
-  eta?: BigNumber;
   delay: BigNumber;
+  eta?: BigNumber;
 
   constructor(targets: string[], values: BigNumber[], callDatas: string[], description: string) {
     this.targets = targets;
@@ -23,9 +25,12 @@ export class Proposal {
     this.startBlock = BigNumber.from(0);
     this.endBlock = BigNumber.from(0);
     this.delay = BigNumber.from(0);
+
+    const descriptionHash = utils.keccak256(formatBytesString(description));
+    this.descriptionHash = descriptionHash;
   }
 
-  public static async createProposal(
+  public static createProposal(
     targets: string[],
     values: BigNumber[],
     callDatas: string[],

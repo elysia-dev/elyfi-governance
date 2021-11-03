@@ -100,7 +100,7 @@ describe('policy', () => {
           carol.address,
         ]),
       ];
-      proposal = await Proposal.createProposal(targets, values, calldatas, 'description');
+      proposal = Proposal.createProposal(targets, values, calldatas, 'description');
       proposal = await testEnv.propose(proposer, proposal);
     });
     it('"voteSucceeded" should be false when for and against are the same', async () => {

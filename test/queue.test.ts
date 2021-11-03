@@ -41,7 +41,7 @@ describe('queue', () => {
         carol.address,
       ]),
     ];
-    proposal = await Proposal.createProposal(targets, values, calldatas, 'description');
+    proposal = Proposal.createProposal(targets, values, calldatas, 'description');
   });
 
   after(async () => {

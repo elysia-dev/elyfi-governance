@@ -54,7 +54,7 @@ describe('scenario', () => {
       const calldatas = [
         testEnv.executor.interface.encodeFunctionData('grantRole', [role, lendingCompany.address]),
       ];
-      proposal = await Proposal.createProposal(targets, values, calldatas, 'description');
+      proposal = Proposal.createProposal(targets, values, calldatas, 'description');
     });
 
     it('success', async () => {
@@ -95,7 +95,7 @@ describe('scenario', () => {
       const calldatas = [
         elyfi.tokenizer.interface.encodeFunctionData('signAssetBond', [assetBond.tokenId, 'hash']),
       ];
-      proposal = await Proposal.createProposal(targets, values, calldatas, 'description');
+      proposal = Proposal.createProposal(targets, values, calldatas, 'description');
     });
 
     it('success', async () => {
