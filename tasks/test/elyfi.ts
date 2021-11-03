@@ -24,7 +24,7 @@ const assetBond = {
   loanDuration: BigNumber.from(365),
   loanStartTimeYear: BigNumber.from(2021),
   loanStartTimeMonth: BigNumber.from(11),
-  loanStartTimeDay: BigNumber.from(2),
+  loanStartTimeDay: BigNumber.from(10),
   ipfsHash: '',
 };
 
@@ -71,7 +71,7 @@ task('elyfi:mintAssetBond', 'mint asset bond')
 
     const tokenizer = (await getContract(hre, 'Elyfi_USDT_Tokenzier')) as Tokenizer;
     const connector = (await getContract(hre, 'Connector')) as Connector;
-    const executor = (await getContract(hre, 'Executor')) as Executor;
+    const executor = (await getContract(hre, 'Executor_Test')) as Executor;
 
     const tokenId = assetBond.tokenId.sub(args.nonce);
 
@@ -96,7 +96,7 @@ task('elyfi:settleAssetBond', 'settle asset bond')
 
     const tokenizer = (await getContract(hre, 'Elyfi_USDT_Tokenzier')) as Tokenizer;
     const connector = (await getContract(hre, 'Connector')) as Connector;
-    const executor = (await getContract(hre, 'Executor')) as Executor;
+    const executor = (await getContract(hre, 'Executor_Test')) as Executor;
 
     const tokenId = assetBond.tokenId.sub(args.nonce);
 

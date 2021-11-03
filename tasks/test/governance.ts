@@ -1,15 +1,15 @@
 import { task } from 'hardhat/config';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { Connector, Tokenizer } from '@elysia-dev/contract-typechain';
+import { Tokenizer } from '@elysia-dev/contract-typechain';
 import { Event } from '@ethersproject/contracts';
 import { Result } from '@ethersproject/abi';
 import { getContract } from '../../utils/deployment';
 import { ElyfiGovernanceCore, Executor } from '../../typechain';
-import { BigNumber, Contract, ethers, utils } from 'ethers';
+import { BigNumber, ethers, utils } from 'ethers';
 import { toRate } from '../../test/utils/math';
 import { Proposal } from '../../test/utils/proposal';
-import { VoteType } from '../../test/utils/enum';
+import { AssetBondState, VoteType } from '../../test/utils/enum';
 
 interface Args {
   nonce: string;
@@ -31,6 +31,29 @@ const assetBond = {
   loanStartTimeMonth: BigNumber.from(7),
   loanStartTimeDay: BigNumber.from(7),
   ipfsHash: '',
+};
+
+const signAssetBondProposal = async (hre: HardhatRuntimeEnvironment, tokenId: BigNumber) => {
+  const tokenizer = (await getContract(hre, 'Elyfi_USDT_Tokenzier')) as Tokenizer;
+  const governanceCore = (await getContract(
+    hre,
+    'ElyfiGovernanceCore_Test'
+  )) as ElyfiGovernanceCore;
+  const targets = [tokenizer.address];
+  const values = [BigNumber.from(0)];
+  const calldatas = [tokenizer.interface.encodeFunctionData('signAssetBond', [tokenId, ''])];
+
+  const proposal = Proposal.createProposal(targets, values, calldatas, 'description');
+  const proposalId = await governanceCore.hashProposal(
+    targets,
+    values,
+    calldatas,
+    proposal.descriptionHash
+  );
+
+  proposal.id = proposalId;
+
+  return proposal;
 };
 
 const checkLendingCompany = async ({
@@ -63,26 +86,29 @@ const checkVoter = async ({
   const provider = new ethers.providers.InfuraProvider(hre.network.name);
   const blockNumber = await provider.getBlockNumber();
   const votes = await governanceCore.getVotes(txSender.address, blockNumber - 1);
-  console.log(votes.toString());
+  if (votes.lt(utils.parseEther('10000'))) {
+    throw new Error('Voting power insufficient');
+  }
 };
 
 task('gov:propose:signAssetBond', 'propose')
   .addParam('nonce', 'The asset bond from saved data')
   .setAction(async (args: Args, hre: HardhatRuntimeEnvironment) => {
-    const [deployer, lendingCompany, borrower] = await hre.ethers.getSigners();
+    const [deployer, lendingCompany] = await hre.ethers.getSigners();
 
     const tokenizer = (await getContract(hre, 'Elyfi_USDT_Tokenzier')) as Tokenizer;
-    const executor = (await getContract(hre, 'Executor')) as Executor;
-    const governanceCore = (await getContract(hre, 'ElyfiGovernanceCore')) as ElyfiGovernanceCore;
+    const executor = (await getContract(hre, 'Executor_Test')) as Executor;
+    const governanceCore = (await getContract(
+      hre,
+      'ElyfiGovernanceCore_Test'
+    )) as ElyfiGovernanceCore;
 
     const tokenId = assetBond.tokenId.sub(args.nonce);
 
     await checkLendingCompany({ executor: executor, txSender: lendingCompany, deployer: deployer });
 
-    const targets = [executor.address];
-    const values = [BigNumber.from(0)];
     const calldatas = [tokenizer.interface.encodeFunctionData('signAssetBond', [tokenId, ''])];
-    const proposal = await Proposal.createProposal(targets, values, calldatas, 'description');
+    const proposal = await signAssetBondProposal(hre, tokenId);
 
     const proposeTx = await governanceCore
       .connect(lendingCompany)
@@ -91,21 +117,76 @@ task('gov:propose:signAssetBond', 'propose')
     const events = (await proposeTx.wait()).events as Array<Event>;
     const result = events[0].args as Result;
     const proposalId = result['proposalId'];
+
     console.log(`The lending company proposed, id is ${proposalId}`);
+    console.log(`Calldata is ${calldatas[0]}`);
   });
 
 task('gov:vote:signAssetBond', 'vote')
-  .addParam('id', 'The proposal id')
+  .addParam('nonce', 'The asset bond from saved data')
   .setAction(async (args: Args, hre: HardhatRuntimeEnvironment) => {
     const [deployer, lendingCompany, borrower] = await hre.ethers.getSigners();
 
-    const governanceCore = (await getContract(hre, 'ElyfiGovernanceCore')) as ElyfiGovernanceCore;
+    const governanceCore = (await getContract(
+      hre,
+      'ElyfiGovernanceCore_Test'
+    )) as ElyfiGovernanceCore;
 
     const accounts = [deployer, lendingCompany, borrower];
 
+    const tokenId = assetBond.tokenId.sub(args.nonce);
+    const proposal = await signAssetBondProposal(hre, tokenId);
+
     for (let account of accounts) {
       await checkVoter({ hre: hre, governanceCore: governanceCore, txSender: account });
-      const voteTx = await governanceCore.connect(account).castVote(args.id, VoteType.for);
+      const voteTx = await governanceCore.connect(account).castVote(proposal.id, VoteType.for);
       await voteTx.wait();
     }
+  });
+
+task('gov:queue:signAssetBond', 'propose')
+  .addParam('nonce', 'The asset bond from saved data')
+  .setAction(async (args: Args, hre: HardhatRuntimeEnvironment) => {
+    const [, lendingCompany] = await hre.ethers.getSigners();
+
+    const governanceCore = (await getContract(
+      hre,
+      'ElyfiGovernanceCore_Test'
+    )) as ElyfiGovernanceCore;
+
+    const tokenId = assetBond.tokenId.sub(args.nonce);
+    const proposal = await signAssetBondProposal(hre, tokenId);
+
+    const queueTx = await governanceCore
+      .connect(lendingCompany)
+      .queue(proposal.targets, proposal.values, proposal.callDatas, proposal.descriptionHash);
+
+    await queueTx.wait();
+
+    console.log(`Token sign queued`);
+  });
+
+task('gov:execute:signAssetBond', 'propose')
+  .addParam('nonce', 'The asset bond from saved data')
+  .setAction(async (args: Args, hre: HardhatRuntimeEnvironment) => {
+    const [, lendingCompany] = await hre.ethers.getSigners();
+
+    const tokenizer = (await getContract(hre, 'Elyfi_USDT_Tokenzier')) as Tokenizer;
+    const governanceCore = (await getContract(
+      hre,
+      'ElyfiGovernanceCore_Test'
+    )) as ElyfiGovernanceCore;
+
+    const tokenId = assetBond.tokenId.sub(args.nonce);
+    const proposal = await signAssetBondProposal(hre, tokenId);
+
+    const executeTx = await governanceCore
+      .connect(lendingCompany)
+      .execute(proposal.targets, proposal.values, proposal.callDatas, proposal.descriptionHash);
+
+    await executeTx.wait();
+
+    const tokenState = await tokenizer.getAssetBondData(tokenId);
+
+    console.log(`Token sign executed, state is ${AssetBondState[tokenState.state]}`);
   });
