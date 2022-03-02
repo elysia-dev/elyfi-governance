@@ -120,6 +120,11 @@ contract ElyfiGovernanceCore is Governor, GovernorTimelockControl {
     return _policy.quorum(blockNumber);
   }
 
+  /// @notice The quorum set in the policy module and it returns the quorum in the current block
+  function quorum() public view returns (uint256) {
+    return quorum(block.number);
+  }
+
   /// @notice Voting power of an account at a specific blockNumber
   /// @param account the account in which to retrieve the prior number of votes
   /// @param blockNumber The block number at which to retrieve the prior number of votes.
