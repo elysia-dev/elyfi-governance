@@ -22,8 +22,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     proposers: [],
     executors: [],
     token: stakedElyfiToken.address,
-    minVotingPower: hre.ethers.utils.parseUnits('10000', 18),
-    quorumNumerator: 20,
+    minVotingPower: hre.ethers.utils.parseUnits('10000', 18), // Min Voting Power
+    quorumNumerator: 1, // Quorum, 1 means 1% of total supply
   };
 
   const executor = await deploy('Executor', {

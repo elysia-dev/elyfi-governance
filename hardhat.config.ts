@@ -2,6 +2,7 @@ import 'dotenv/config';
 import '@typechain/hardhat';
 import '@nomiclabs/hardhat-waffle';
 import '@nomiclabs/hardhat-ethers';
+import '@nomiclabs/hardhat-etherscan';
 import 'hardhat-deploy';
 import 'hardhat-deploy-ethers';
 import 'hardhat-gas-reporter';
@@ -52,7 +53,7 @@ const config: HardhatUserConfig = {
       },
       chainId: 42,
     },
-    binanceTestnet: {
+    bscTestnet: {
       url: 'https://data-seed-prebsc-1-s1.binance.org:8545',
       chainId: 97,
       gasPrice: 20000000000,
@@ -78,6 +79,12 @@ const config: HardhatUserConfig = {
   verify: {
     etherscan: {
       apiKey: process.env.ETHERSCAN_API_KEY,
+    },
+  },
+  etherscan: {
+    apiKey: {
+      bsc: process.env.BSCSCAN_API_KEY,
+      bscTestnet: process.env.BSCSCAN_API_KEY,
     },
   },
   paths: {
