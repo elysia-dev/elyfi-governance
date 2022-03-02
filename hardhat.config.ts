@@ -65,13 +65,20 @@ const config: HardhatUserConfig = {
       chainId: 56,
       gasPrice: 20000000000,
       accounts: [process.env.ADMIN || ''],
+      verify: {
+        etherscan: {
+          apiKey: process.env.BSCSCAN_API_KEY,
+        },
+      },
     },
     ganache: {
       url: 'http://0.0.0.0:8545',
     },
   },
-  etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
+  verify: {
+    etherscan: {
+      apiKey: process.env.ETHERSCAN_API_KEY,
+    },
   },
   paths: {
     sources: './contracts',
