@@ -22,4 +22,5 @@ interface IPolicy {
     returns (bool);
 
   function quorum(uint256 blockNumber) external view returns (uint256);
+  function quorum() external view returns (uint256);
 }

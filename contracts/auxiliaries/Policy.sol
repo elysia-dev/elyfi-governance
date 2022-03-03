@@ -109,6 +109,12 @@ contract Policy is IPolicy, AccessControl {
     return (token.getPastTotalSupply(blockNumber) * quorumNumerator()) / quorumDenominator();
   }
 
+  /// @notice Returns whether the casted vote in the proposal exceeds quorum
+  /// @dev The quorum can be updated
+  function quorum() public view override returns (uint256) {
+    return (token.totalSupply() * quorumNumerator()) / quorumDenominator();
+  }
+
   //////////////////////// Quorum
 
   function quorumNumerator() public view virtual returns (uint256) {
