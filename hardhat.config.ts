@@ -56,8 +56,10 @@ const config: HardhatUserConfig = {
       url: 'http://0.0.0.0:8545',
     },
   },
-  etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
+  verify: {
+    etherscan: {
+      apiKey: process.env.ETHERSCAN_API_KEY,
+    },
   },
   paths: {
     sources: './contracts',
