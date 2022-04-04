@@ -16,7 +16,7 @@ contract ElyfiGovernanceCoreTest is ElyfiGovernanceCore {
     _votingPeriod = votingPeriod_;
   }
 
-  receive() external payable {}
+  receive() external payable override {}
 
   function votingDelay() public view override returns (uint256) {
     return _votingDelay;
